@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Punti Infiniti</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        #counter {
+            font-size: 24px;
+        }
+        #resetButton,
+        #clearButton {
+            display: none; /* Pulsanti nascosti di default */
+        }
+    </style>
+</head>
+<body>
+    <h1>Punti Infiniti</h1>
+    <div id="thresholdText">Prossima soglia: 100</div>
+    <button id="incrementButton">+1 punto</button>
+    <button id="resetButton">Aggiorna</button>
+    <button id="clearButton">Reset Progressi</button>
+    <div id="counter">0</div>
+
+    <script>
+        // Recupera i valori salvati da localStorage o inizializza ai valori predefiniti
+        let count = localStorage.getItem('count') ? parseInt(localStorage.getItem('count')) : 0;
+        let incrementValue = localStorage.getItem('incrementValue') ? parseInt(localStorage.getItem('incrementValue')) : 1;
+        let nextThreshold = localStorage.getItem('nextThreshold') ? parseInt(localStorage.getItem('nextThreshold')) : 100;
+        
+        const incrementButton = document.getElementById('incrementButton');
+        const resetButton = document.getElementById('resetButton');
+        const clearButton = document.getElementById('clearButton');
+        const counter = document.getElementById('counter');
+        const thresholdText = document.getElementById('thresholdText');
+
+        // Imposta il testo iniziale del pulsante e della soglia
+        incrementButton.textContent = `+${incrementValue} punti`;
+        thresholdText.textContent = `Prossima soglia: ${nextThreshold}`;
+        counter.textContent = count;
+
+        // Mostra o nasconde il pulsante di reset in base al valore del contatore
+        function updateResetButtonVisibility() {
+            if (count >= nextThreshold) {
+                resetButton.style.display = 'block';
+            } else {
+                resetButton.style.display = 'none';
+            }
+        }
+
+        incrementButton.addEventListener('click', () => {
+            count += incrementValue;
+            counter.textContent = count;
+            localStorage.setItem('count', count);
+
+            // Controlla se mostrare il pulsante di reset
+            updateResetButtonVisibility();
+        });
+
+        resetButton.addEventListener('click', () => {
+            count = 0;
+            incrementValue += 1;
+            nextThreshold *= 2;
+
+            localStorage.setItem('count', count);
+            localStorage.setItem('incrementValue', incrementValue);
+            localStorage.setItem('nextThreshold', nextThreshold);
+
+            counter.textContent = count;
+            incrementButton.textContent = `+${incrementValue} punti`;
+            thresholdText.textContent = `Prossima soglia: ${nextThreshold}`;
+            resetButton.style.display = 'none'; // Nascondi il pulsante di reset dopo averlo cliccato
+        });
+
+        // Funzione per resettare tutti i progressi
+        clearButton.addEventListener('click', () => {
+            localStorage.removeItem('count');
+            localStorage.removeItem('incrementValue');
+            localStorage.removeItem('nextThreshold');
+
+            count = 0;
+            incrementValue = 1;
+            nextThreshold = 100;
+
+            counter.textContent = count;
+            incrementButton.textContent = `+${incrementValue} punti`;
+            thresholdText.textContent = `Prossima soglia: ${nextThreshold}`;
+            resetButton.style.display = 'none'; // Nascondi il pulsante di reset dopo il reset dei progressi
+            clearButton.style.display = 'none'; // Nascondi il pulsante di reset progressi dopo il reset
+        });
+
+        // Mostra il pulsante "Reset Progressi" se ci sono dei progressi salvati
+        if (localStorage.getItem('count')) {
+            clearButton.style.display = 'block';
+        }
+
+        // Aggiorna la visibilità del pulsante di reset all'avvio
+        updateResetButtonVisibility();
+    </script>
+</body>
+</html>
