@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monete Infinite</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 90vh;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        #thresholdText {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        #incrementButton {
+            padding: 20px 40px;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        #counter {
+            font-size: 50px;
+            margin-bottom: 50px;
+        }
+        #resetButton {
+            padding: 20px 40px;
+            font-size: 32px;
+            margin-bottom: 40px;
+            display: none;
+        }
+        #clearButton {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Monete Infinite</h1>
+    <div id="thresholdText">Prossima soglia: 100 $</div>
+    <button id="incrementButton">+1 $</button>
+    <button id="resetButton">Aggiorna</button>
+    <div id="counter">0 $</div>
+    <button id="clearButton">Reset Progressi</button>
+
+    <script>
+        // Recupera i valori salvati da localStorage o inizializza ai valori predefiniti
+        let count = localStorage.getItem('count') ? parseInt(localStorage.getItem('count')) : 0;
+        let incrementValue = localStorage.getItem('incrementValue') ? parseInt(localStorage.getItem('incrementValue')) : 1;
+        let nextThreshold = localStorage.getItem('nextThreshold') ? parseInt(localStorage.getItem('nextThreshold')) : 100;
+        
+        const incrementButton = document.getElementById('incrementButton');
+        const resetButton = document.getElementById('resetButton');
+        const clearButton = document.getElementById('clearButton');
+        const counter = document.getElementById('counter');
+        const thresholdText = document.getElementById('thresholdText');
+
+        // Imposta il testo iniziale del pulsante e della soglia
+        incrementButton.textContent = `+${incrementValue} $`;
+        thresholdText.textContent = `Prossima soglia: ${nextThreshold} $`;
+        counter.textContent = `${count} $`;
+
+        if (count >= nextThreshold) {
+            resetButton.style.display = 'block';
+        }
+
+        incrementButton.addEventListener('click', () => {
+            count += incrementValue;
+            counter.textContent = `${count} $`;
+            localStorage.setItem('count', count);
+
+            if (count >= nextThreshold) {
+                resetButton.style.display = 'block';
+            }
+        });
+
+        resetButton.addEventListener('click', () => {
+            count = 0;
+            incrementValue += 1;
+            nextThreshold *= 2;
+
+            localStorage.setItem('count', count);
+            localStorage.setItem('incrementValue', incrementValue);
+            localStorage.setItem('nextThreshold', nextThreshold);
+
+            counter.textContent = `${count} $`;
+            incrementButton.textContent = `+${incrementValue} $`;
+            thresholdText.textContent = `Prossima soglia: ${nextThreshold} $`;
+            resetButton.style.display = 'none';
+        });
+
+        // Funzione per resettare tutti i progressi
+        clearButton.addEventListener('click', () => {
+            localStorage.removeItem('count');
+            localStorage.removeItem('incrementValue');
+            localStorage.removeItem('nextThreshold');
+
+            count = 0;
+            incrementValue = 1;
+            nextThreshold = 100;
+
+            counter.textContent = `${count} $`;
+            incrementButton.textContent = `+${incrementValue} $`;
+            thresholdText.textContent = `Prossima soglia: ${nextThreshold} $`;
+            resetButton.style.display = 'none';
+            clearButton.style.display = 'none';
+        });
+
+        // Mostra il pulsante "Reset Progressi" se ci sono dei progressi salvati
+        if (localStorage.getItem('count')) {
+            clearButton.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
