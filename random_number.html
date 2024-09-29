@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cambia Numero Casuale</title>
+    <title>DADO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -43,12 +43,12 @@
  
 <div class="container">
     <div class="number" id="numberDisplay">0</div>
-    <button class="btn" onclick="changeNumber()">Cambia numero</button>
+    <button class="btn" onclick="changeNumber()">GIRA</button>
 </div>
  
 <script>
     function changeNumber() {
-        var randomNumber = Math.floor(Math.random() * 6) + 1; // Genera un numero casuale tra 1 e 6
+        var randomNumber = Math.floor(Math.random() * 6) + 1;
         document.getElementById("numberDisplay").textContent = randomNumber;
     }
 </script>
