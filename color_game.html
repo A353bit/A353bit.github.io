@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gioco di Concentrazione</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        .color-text {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .squares {
+            display: flex;
+            gap: 20px;
+        }
+
+        .square {
+            width: 100px;
+            height: 100px;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+
+        .square.red { background-color: red; }
+        .square.green { background-color: green; }
+        .square.blue { background-color: blue; }
+        .square.yellow { background-color: yellow; }
+
+        .scoreboard {
+            margin-top: 30px;
+        }
+
+        .score, .highscore {
+            font-size: 24px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="color-text" id="colorText">Rosso</div>
+    <div class="squares">
+        <div class="square red" onclick="checkColor('red')"></div>
+        <div class="square yellow" onclick="checkColor('yellow')"></div>
+        <div class="square green" onclick="checkColor('green')"></div>
+        <div class="square blue" onclick="checkColor('blue')"></div>
+    </div>
+    <div class="scoreboard">
+        <div class="score">Punti: <span id="score">0</span></div>
+        <div class="highscore">Miglior Punteggio: <span id="highscore">0</span></div>
+    </div>
+
+    <script>
+        // Mappa colori inglese-italiano
+        const colorMap = {
+            red: "Rosso",
+            yellow: "Giallo",
+            green: "Verde",
+            blue: "Blu"
+        };
+
+        const colors = ["red", "yellow", "green", "blue"];
+        let currentColor = "";
+        let displayedColorName = "";
+        let score = 0;
+        let highscore = localStorage.getItem('highscore') || 0;
+
+        function randomColor() {
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function updateColorText() {
+            const realColor = randomColor();
+            const isTricky = Math.random() > 0.5;
+            currentColor = realColor;
+            displayedColorName = isTricky ? randomColor() : realColor;
+            document.getElementById('colorText').textContent = colorMap[displayedColorName];
+            document.getElementById('colorText').style.color = realColor;
+        }
+
+        function checkColor(selectedColor) {
+            if (selectedColor === currentColor) {
+                score++;
+            } else {
+                score = 0;
+            }
+
+            if (score > highscore) {
+                highscore = score;
+                localStorage.setItem('highscore', highscore);
+            }
+
+            document.getElementById('score').textContent = score;
+            document.getElementById('highscore').textContent = highscore;
+
+            updateColorText();
+        }
+
+        // Inizializza il gioco
+        document.getElementById('highscore').textContent = highscore;
+        updateColorText();
+    </script>
+</body>
+</html>
