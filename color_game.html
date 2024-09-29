@@ -45,6 +45,22 @@
             font-size: 24px;
             margin: 5px;
         }
+
+        .reset-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            background-color: #d9534f;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .reset-button:hover {
+            background-color: #ff0000;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -52,6 +68,7 @@
     <div class="squares">
         <div class="square red" onclick="checkColor('red')"></div>
         <div class="square yellow" onclick="checkColor('yellow')"></div>
+        <br></br>
         <div class="square green" onclick="checkColor('green')"></div>
         <div class="square blue" onclick="checkColor('blue')"></div>
     </div>
@@ -59,6 +76,9 @@
         <div class="score">Punti: <span id="score">0</span></div>
         <div class="highscore">Miglior Punteggio: <span id="highscore">0</span></div>
     </div>
+    
+    <!-- Pulsante di reset -->
+    <button class="reset-button" onclick="resetGame()">Resetta Progressi</button>
 
     <script>
         // Mappa colori inglese-italiano
@@ -104,6 +124,16 @@
             document.getElementById('highscore').textContent = highscore;
 
             updateColorText();
+        }
+
+        // Funzione per resettare tutti i progressi
+        function resetGame() {
+            score = 0;
+            highscore = 0;
+            localStorage.removeItem('highscore');  // Rimuove il miglior punteggio da localStorage
+            document.getElementById('score').textContent = score;
+            document.getElementById('highscore').textContent = highscore;
+            updateColorText();  // Aggiorna il gioco
         }
 
         // Inizializza il gioco
