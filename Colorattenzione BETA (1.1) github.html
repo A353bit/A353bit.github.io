@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Gioco di Concentrazione</title>
+    <style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(45deg, #32a842, #32a8a6);
+        font-family: Arial, sans-serif;
+    }
+
+    body {
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .color-text {
+        margin-bottom: 20px;
+        color: white;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .squares {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+    }
+
+    .square {
+        cursor: pointer;
+        border-radius: 10px;
+        width: 100px;
+        height: 100px;
+        transition: transform 0.2s;
+    }
+
+    .square:hover {
+        transform: scale(1.1);
+    }
+
+    .square.red { background-color: red; }
+    .square.green { background-color: green; }
+    .square.blue { background-color: blue; }
+    .square.yellow { background-color: yellow; }
+
+    .scoreboard {
+        margin-top: 20px;
+        color: white;
+    }
+
+    .timer {
+        font-size: 24px;
+        margin-top: 10px;
+        color: white;
+    }
+
+    .reset-button, .start-button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        cursor: pointer;
+        border: none;
+        background-color: #d9534f;
+        color: white;
+        border-radius: 5px;
+        transition: background-color 0.2s;
+    }
+
+    .reset-button:hover, .start-button:hover {
+        background-color: #c9302c;
+    }
+
+    .reset-button {
+        display: none;
+    }
+
+    /* Stili per schermi piccoli */
+    @media (max-width: 768px) {
+        .color-text {
+            font-size: 5vw;
+        }
+        .square {
+            width: 15vw;
+            height: 15vw;
+        }
+        .scoreboard, .timer {
+            font-size: 4vw;
+        }
+        .reset-button, .start-button {
+            font-size: 3.5vw;
+        }
+    }
+
+    /* Stili per schermi grandi */
+    @media (min-width: 769px) {
+        .color-text {
+            font-size: 48px;
+        }
+        .square {
+            width: 100px;
+            height: 100px;
+        }
+        .scoreboard {
+            font-size: 24px;
+        }
+        .timer {
+            font-size: 24px;
+        }
+        .reset-button, .start-button {
+            font-size: 18px;
+        }
+    }
+</style>
+</head>
+<body>
+
+    <!-- Pulsante per iniziare il gioco -->
+    <button class="start-button" id="startButton">Inizia Gioco</button>
+
+    <!-- Testo del colore e i quadrati -->
+    <div class="color-text" id="colorText">Rosso</div>
+    <div class="squares">
+        <div class="square red" onclick="checkColor('red')"></div>
+        <div class="square yellow" onclick="checkColor('yellow')"></div>
+        <div class="square green" onclick="checkColor('green')"></div>
+        <div class="square blue" onclick="checkColor('blue')"></div>
+    </div>
+
+    <!-- Punteggio e miglior punteggio -->
+    <div class="scoreboard">
+        <div class="score">Punti: <span id="score">0</span></div>
+        <div class="highscore">Miglior Punteggio: <span id="highscore">0</span></div>
+    </div>
+
+    <!-- Timer di gioco -->
+    <div class="timer" id="timer">Tempo: 120</div>
+
+    <!-- Pulsante di reset -->
+    <button class="reset-button" id="resetButton">Ricomincia Gioco</button>
+
+    <!-- Audio -->
+    <audio id="backgroundAudio" src="https://drive.google.com/uc?id=12RGf2sW5LRn0-PYdqtV769s9MogCajiv" controls></audio>
+
+   <script>
+// Variabili globali
+const colorMap = {
+    red: "Rosso",
+    yellow: "Giallo",
+    green: "Verde",
+    blue: "Blu"
+};
+const colors = ["red", "yellow", "green", "blue"];
+let currentColor = "";
+let displayedColorName = "";
+let score = 0;
+let highscore = localStorage.getItem('highscore') || 0;
+const audio = document.getElementById('backgroundAudio');
+let gameInterval;
+let timerInterval;
+let timeLeft = 120;  // Durata del timer di gioco (60 secondi)
+
+// Funzione per ottenere un colore casuale
+function randomColor() {
+    return colors[Math.floor(Math.random() * colors.length)];
+}
+
+// Aggiorna il testo del colore visualizzato
+function updateColorText() {
+    const realColor = randomColor();
+    const isTricky = Math.random() > 0.5;
+    currentColor = realColor;
+    displayedColorName = isTricky ? randomColor() : realColor;
+    document.getElementById('colorText').textContent = colorMap[displayedColorName];
+    document.getElementById('colorText').style.color = realColor;
+}
+
+// Funzione per controllare se il colore selezionato è corretto
+function checkColor(selectedColor) {
+    if (selectedColor === currentColor) {
+        score++;
+    } else {
+        score = 0;
+    }
+
+    if (score > highscore) {
+        highscore = score;
+        localStorage.setItem('highscore', highscore);
+    }
+
+    document.getElementById('score').textContent = score;
+    document.getElementById('highscore').textContent = highscore;
+
+    updateColorText();
+}
+
+// Funzione per avviare il gioco
+function startGame() {
+    document.getElementById('startButton').style.display = 'none';  // Nasconde il pulsante di inizio
+    document.getElementById('colorText').style.display = 'block';  // Mostra il gioco
+    document.querySelector('.squares').style.display = 'flex';
+    document.querySelector('.scoreboard').style.display = 'block';
+    document.getElementById('timer').style.display = 'block';
+
+    score = 0;
+    timeLeft = 120;  // Imposta il tempo a 60 secondi
+    document.getElementById('score').textContent = score;
+    document.getElementById('highscore').textContent = highscore;
+    document.getElementById('timer').textContent = `Tempo: ${timeLeft}`;
+
+    audio.play();  // Riproduce l'audio
+    updateColorText();
+    
+    //gameInterval = setInterval(updateColorText, 1000);  // Aggiorna i colori ogni secondo
+    timerInterval = setInterval(updateTimer, 1000);  // Aggiorna il timer ogni secondo
+
+audio.onended = function() {
+    audio.currentTime = 0;  // Riporta l'audio all'inizio
+   };
+}
+
+// Funzione per aggiornare il timer
+function updateTimer() {
+    timeLeft--;
+    document.getElementById('timer').textContent = `Tempo: ${timeLeft}`;
+
+    if (timeLeft <= 0) {
+        endGame();
+    }
+}
+
+// Funzione per terminare il gioco
+function endGame() {
+    clearInterval(gameInterval);
+    clearInterval(timerInterval);
+    document.getElementById('resetButton').style.display = 'block';  // Mostra il pulsante di reset
+    document.getElementById('colorText').style.display = 'none';  // Nasconde il gioco
+    document.querySelector('.squares').style.display = 'none';
+    document.getElementById('timer').style.display = 'none';
+    // Non fermiamo l'audio qui, continua a suonare anche dopo la fine del gioco
+    
+}
+
+// Funzione per ricominciare il gioco
+function resetGame() {
+    document.getElementById('resetButton').style.display = 'none';  // Nasconde il pulsante di reset
+    audio.currentTime = 0;  // Riporta l'audio all'inizio
+    audio.play();  // Riparte l'audio
+    startGame();  // Ricomincia il gioco
+}
+
+// Associa le funzioni ai pulsanti
+document.getElementById('startButton').onclick = startGame;
+document.getElementById('resetButton').onclick = resetGame;
+</script>
+</body>
+</html>
