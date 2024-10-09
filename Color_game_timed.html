@@ -125,8 +125,10 @@
 </head>
 <body>
 
-    <!-- Pulsante per iniziare il gioco -->
+    <!-- Ad inizio gioco -->
     <button class="start-button" id="startButton">Inizia Gioco</button>
+    <h1>ISTRUZIONI</h1>
+    <p>dovete premere il quadrato dello stesso colore della scritta. NON SEGUITE CIÒ CHE DICE LA SCRITTA, SOLO IL SUO COLORE. infatti il gioco ogni tanto vi inganna</p>
 
     <!-- Testo del colore e i quadrati -->
     <div class="color-text" id="colorText">Rosso</div>
@@ -211,6 +213,8 @@ function startGame() {
     document.querySelector('.squares').style.display = 'flex';
     document.querySelector('.scoreboard').style.display = 'block';
     document.getElementById('timer').style.display = 'block';
+    document.getElementById('h1').style.display = 'none';
+    document.getElementById('p').style.display = 'none';
 
     score = 0;
     timeLeft = 180;  // Imposta il tempo a 180 secondi
