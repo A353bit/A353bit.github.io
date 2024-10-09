@@ -23,14 +23,10 @@
         text-align: center;
     }
 
-    h1 {
+    h1, p {
         display: block;
     }
-
-    p {
-        display: block;
-    }
-
+    
     .color-text {
         margin-bottom: 20px;
         color: white;
@@ -216,23 +212,31 @@ function checkColor(selectedColor) {
 
 // Funzione per avviare il gioco
 function startGame() {
-    document.getElementById('startButton').style.display = 'none';  // Nasconde il pulsante di inizio
-    document.getElementById('colorText').style.display = 'block';  // Mostra il gioco
+    // Nascondi il pulsante di inizio
+    document.getElementById('startButton').style.display = 'none';
+
+    // Nascondi h1 e p
+    const header = document.querySelector('h1');
+    const paragraph = document.querySelector('p');
+    if (header) header.style.display = 'none';
+    if (paragraph) paragraph.style.display = 'none';
+
+    // Mostra il gioco
+    document.getElementById('colorText').style.display = 'block';
     document.querySelector('.squares').style.display = 'flex';
     document.querySelector('.scoreboard').style.display = 'block';
     document.getElementById('timer').style.display = 'block';
-    document.getElementById('h1').style.display = 'none';
-    document.getElementById('p').style.display = 'none';
 
+    // Ripristina punteggio e timer
     score = 0;
     timeLeft = 180;  // Imposta il tempo a 180 secondi
     document.getElementById('score').textContent = score;
-    document.getElementById('highscore').textContent = highscore2;  // Modificato
+    document.getElementById('highscore').textContent = highscore2;
     document.getElementById('timer').textContent = `Tempo: ${timeLeft}`;
 
     audio.play();  // Riproduce l'audio
     updateColorText();
-    
+
     timerInterval = setInterval(updateTimer, 1000);  // Aggiorna il timer ogni secondo
 
     audio.onended = function() {
