@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Gioco di Concentrazione</title>
-    <style>
+<style>
     html, body {
         margin: 0;
         padding: 0;
@@ -27,10 +27,11 @@
         margin-bottom: 20px;
         color: white;
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        display: none;  /* Nascondi inizialmente */
     }
 
     .squares {
-        display: flex;
+        display: none;  /* Nascondi inizialmente */
         gap: 20px;
         justify-content: center;
     }
@@ -55,12 +56,14 @@
     .scoreboard {
         margin-top: 20px;
         color: white;
+        display: none;  /* Nascondi inizialmente */
     }
 
     .timer {
         font-size: 24px;
         margin-top: 10px;
         color: white;
+        display: none;  /* Nascondi inizialmente */
     }
 
     .reset-button, .start-button {
@@ -79,7 +82,7 @@
     }
 
     .reset-button {
-        display: none;
+        display: none;  /* Nascondi inizialmente */
     }
 
     /* Stili per schermi piccoli */
@@ -141,13 +144,13 @@
     </div>
 
     <!-- Timer di gioco -->
-    <div class="timer" id="timer">Tempo: 120</div>
+    <div class="timer" id="timer">Tempo: 180</div>
 
     <!-- Pulsante di reset -->
     <button class="reset-button" id="resetButton">Ricomincia Gioco</button>
 
     <!-- Audio -->
-    <audio id="backgroundAudio" src="content://media/external/audio/media/1000073095"></audio>
+    <audio id="backgroundAudio" src="content://media/external/audio/media/1000072096"></audio>
 
    <script>
 // Variabili globali
@@ -161,11 +164,11 @@ const colors = ["red", "yellow", "green", "blue"];
 let currentColor = "";
 let displayedColorName = "";
 let score = 0;
-let highscore = localStorage.getItem('highscore') || 0;
+let highscore2 = localStorage.getItem('highscore2') || 0;  // Modificato
 const audio = document.getElementById('backgroundAudio');
 let gameInterval;
 let timerInterval;
-let timeLeft = 120;  // Durata del timer di gioco (60 secondi)
+let timeLeft = 180;  // Durata del timer di gioco (180 secondi)
 
 // Funzione per ottenere un colore casuale
 function randomColor() {
@@ -190,13 +193,13 @@ function checkColor(selectedColor) {
         score = 0;
     }
 
-    if (score > highscore) {
-        highscore = score;
-        localStorage.setItem('highscore', highscore);
+    if (score > highscore2) {  // Modificato
+        highscore2 = score;  // Modificato
+        localStorage.setItem('highscore2', highscore2);  // Modificato
     }
 
     document.getElementById('score').textContent = score;
-    document.getElementById('highscore').textContent = highscore;
+    document.getElementById('highscore').textContent = highscore2;  // Modificato
 
     updateColorText();
 }
@@ -210,20 +213,19 @@ function startGame() {
     document.getElementById('timer').style.display = 'block';
 
     score = 0;
-    timeLeft = 120;  // Imposta il tempo a 60 secondi
+    timeLeft = 180;  // Imposta il tempo a 180 secondi
     document.getElementById('score').textContent = score;
-    document.getElementById('highscore').textContent = highscore;
+    document.getElementById('highscore').textContent = highscore2;  // Modificato
     document.getElementById('timer').textContent = `Tempo: ${timeLeft}`;
 
     audio.play();  // Riproduce l'audio
     updateColorText();
     
-    //gameInterval = setInterval(updateColorText, 1000);  // Aggiorna i colori ogni secondo
     timerInterval = setInterval(updateTimer, 1000);  // Aggiorna il timer ogni secondo
 
-audio.onended = function() {
-    audio.currentTime = 0;  // Riporta l'audio all'inizio
-   };
+    audio.onended = function() {
+        audio.currentTime = 0;  // Riporta l'audio all'inizio
+    };
 }
 
 // Funzione per aggiornare il timer
@@ -245,7 +247,6 @@ function endGame() {
     document.querySelector('.squares').style.display = 'none';
     document.getElementById('timer').style.display = 'none';
     // Non fermiamo l'audio qui, continua a suonare anche dopo la fine del gioco
-    
 }
 
 // Funzione per ricominciare il gioco
@@ -259,6 +260,7 @@ function resetGame() {
 // Associa le funzioni ai pulsanti
 document.getElementById('startButton').onclick = startGame;
 document.getElementById('resetButton').onclick = resetGame;
+
 </script>
 </body>
 </html>
