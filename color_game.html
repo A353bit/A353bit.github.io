@@ -164,7 +164,16 @@
     let displayedColorName = "";
     let score = 0;
     let highscore = localStorage.getItem('highscore') || 0;
-    const audio = document.getElementById('backgroundAudio');  // Riferimento all'elemento audio
+    const audioPlayer = document.getElementById('audioPlayer');  // Riferimento all'elemento audio
+
+    // Array di file audio da riprodurre in ordine
+    const audioFiles = [
+        'audio1.m4a',  // Primo file audio
+        'audio2.m4a',  // Secondo file audio
+        'audio3.m4a'   // Terzo file audio
+    ];
+    
+    let currentAudioIndex = 0;  // Indice dell'audio corrente
 
     // Funzione per ottenere un colore casuale
     function randomColor() {
@@ -210,24 +219,34 @@
         updateColorText();  // Aggiorna il gioco
     }
 
-    // Inizializza il gioco
-    document.getElementById('highscore').textContent = highscore;
-    updateColorText();
+    // Funzione per riprodurre l'audio in sequenza con una pausa di 5 secondi tra di essi
+    function playAudioSequence() {
+        // Imposta il file audio corrente
+        audioPlayer.src = audioFiles[currentAudioIndex];
+        audioPlayer.play();
 
-    // Funzione per far partire l'audio in loop con una pausa di 5 secondi alla fine
-    function playAudioWithDelay() {
-        audio.play();
+        // Quando l'audio corrente finisce
+        audioPlayer.onended = function() {
+            currentAudioIndex++;  // Passa al prossimo file audio
 
-        audio.onended = function() {
-            setTimeout(function() {
-                audio.play();
-            }, 5000); // Pausa di 5 secondi prima di ricominciare
+            if (currentAudioIndex < audioFiles.length) {
+                setTimeout(function() {
+                    playAudioSequence();  // Riproduci il prossimo file audio dopo 5 secondi
+                }, 5000);
+            } else {
+                currentAudioIndex = 0;  // Resetta l'indice per ricominciare la sequenza
+                setTimeout(function() {
+                    playAudioSequence();  // Ricomincia dall'inizio dopo 5 secondi
+                }, 5000);
+            }
         };
     }
 
     // Avvia l'audio quando la pagina viene caricata
     window.onload = function() {
-        playAudioWithDelay();
+        document.getElementById('highscore').textContent = highscore;
+        updateColorText();
+        playAudioSequence();  // Avvia la sequenza audio
     };
     </script>
 </body>
