@@ -24,29 +24,10 @@
             text-align: center;
         }
 
-        h1 {
-            margin-top: 10px;
-            font-size: 15px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
-        
-        h2 {
-            margin-top: 10px;
-            font-size: 15px;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
-
-        p {
-            font-size: 10px;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
-
         .color-text {
             margin-bottom: 20px;
             color: white; /* Testo bianco per risaltare sullo sfondo */
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Aggiunge un'ombra al testo per leggibilità */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Aggiunge un'ombra al testo per leggibilitÃ  */
         }
 
         .squares {
@@ -90,6 +71,21 @@
             background-color: #c9302c;
         }
 
+        .alert-button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        .alert-button:hover {
+            background-color: #45a049;
+        }
+
         /* Stili per schermi piccoli (telefoni e tablet) */
         @media (max-width: 768px) {
             .color-text {
@@ -105,7 +101,7 @@
                 font-size: 4vw;
             }
 
-            .reset-button {
+            .reset-button, .alert-button {
                 font-size: 3.5vw;
             }
         }
@@ -128,6 +124,10 @@
             .reset-button {
                 font-size: 18px;
             }
+
+            .alert-button {
+                font-size: 16px;
+            }
         }
     </style>
 </head>
@@ -143,113 +143,77 @@
         <div class="score">Punti: <span id="score">0</span></div>
         <div class="highscore">Miglior Punteggio: <span id="highscore">0</span></div>
     </div>
+
+    <!-- Pulsante di reset -->
     <button class="reset-button" onclick="resetGame()">Resetta Progressi</button>
-    <h1>____________________</h1>
-    <h2>ISTRUZIONI</h2>
-    <p>dovete premere il quadrato dello stesso colore della scritta. NON SEGUITE CIÒ CHE DICE LA SCRITTA, SOLO IL SUO COLORE. infatti il gioco ogni tanto vi inganna</p>
-
-    <audio id="backgroundAudio" src="">../audio/Farewell-Lsplash.m4a</audio>
-    <audio id="backgroundAudio" src="">../audio/Chillwave-Lsplash.m4a</audio>
-    <audio id="backgroundAudio" src="">../audio/Chillax-Lsplash.m4a</audio>
- 
-    <script>
-    // Mappa colori inglese-italiano
-    const colorMap = {
-        red: "Rosso",
-        yellow: "Giallo",
-        green: "Verde",
-        blue: "Blu"
-    };
-
-    const colors = ["red", "yellow", "green", "blue"];
-    let currentColor = "";
-    let displayedColorName = "";
-    let score = 0;
-    let highscore = localStorage.getItem('highscore') || 0;
-    const audioPlayer = document.getElementById('audioPlayer');  // Riferimento all'elemento audio
-
-    // Array di file audio da riprodurre in ordine
-    const audioFiles = [
-    '../audio/Farewell-Lsplash.m4a',  // Il percorso "sali" di una cartella per raggiungere /audio
-    '../audio/Chillwave-Lsplash.m4a',
-    '../audio/Chillax-Lsplash.m4a'
-    ];
     
-    let currentAudioIndex = 0;  // Indice dell'audio corrente
+    <!-- Pulsante per mostrare un alert -->
+    <button class="alert-button" onclick="showAlert()">Istruzioni</button>
 
-    // Funzione per ottenere un colore casuale
-    function randomColor() {
-        return colors[Math.floor(Math.random() * colors.length)];
-    }
-
-    // Aggiorna il testo del colore visualizzato
-    function updateColorText() {
-        const realColor = randomColor();
-        const isTricky = Math.random() > 0.5;
-        currentColor = realColor;
-        displayedColorName = isTricky ? randomColor() : realColor;
-        document.getElementById('colorText').textContent = colorMap[displayedColorName];
-        document.getElementById('colorText').style.color = realColor;
-    }
-
-    // Controlla se il colore selezionato è corretto
-    function checkColor(selectedColor) {
-        if (selectedColor === currentColor) {
-            score++;
-        } else {
-            score = 0;
-        }
-
-        if (score > highscore) {
-            highscore = score;
-            localStorage.setItem('highscore', highscore);
-        }
-
-        document.getElementById('score').textContent = score;
-        document.getElementById('highscore').textContent = highscore;
-
-        updateColorText();
-    }
-
-    // Funzione per resettare tutti i progressi
-    function resetGame() {
-        score = 0;
-        highscore = 0;
-        localStorage.removeItem('highscore');  // Rimuove il miglior punteggio da localStorage
-        document.getElementById('score').textContent = score;
-        document.getElementById('highscore').textContent = highscore;
-        updateColorText();  // Aggiorna il gioco
-    }
-
-    // Funzione per riprodurre l'audio in sequenza con una pausa di 5 secondi tra di essi
-    function playAudioSequence() {
-        // Imposta il file audio corrente
-        audioPlayer.src = audioFiles[currentAudioIndex];
-        audioPlayer.play();
-
-        // Quando l'audio corrente finisce
-        audioPlayer.onended = function() {
-            currentAudioIndex++;  // Passa al prossimo file audio
-
-            if (currentAudioIndex < audioFiles.length) {
-                setTimeout(function() {
-                    playAudioSequence();  // Riproduci il prossimo file audio dopo 5 secondi
-                }, 5000);
-            } else {
-                currentAudioIndex = 0;  // Resetta l'indice per ricominciare la sequenza
-                setTimeout(function() {
-                    playAudioSequence();  // Ricomincia dall'inizio dopo 5 secondi
-                }, 5000);
-            }
+    <script>
+        // Mappa colori inglese-italiano
+        const colorMap = {
+            red: "Rosso",
+            yellow: "Giallo",
+            green: "Verde",
+            blue: "Blu"
         };
-    }
 
-    // Avvia l'audio quando la pagina viene caricata
-    window.onload = function() {
+        const colors = ["red", "yellow", "green", "blue"];
+        let currentColor = "";
+        let displayedColorName = "";
+        let score = 0;
+        let highscore = localStorage.getItem('highscore') || 0;
+
+        function randomColor() {
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function updateColorText() {
+            const realColor = randomColor();
+            const isTricky = Math.random() > 0.5;
+            currentColor = realColor;
+            displayedColorName = isTricky ? randomColor() : realColor;
+            document.getElementById('colorText').textContent = colorMap[displayedColorName];
+            document.getElementById('colorText').style.color = realColor;
+        }
+
+        function checkColor(selectedColor) {
+            if (selectedColor === currentColor) {
+                score++;
+            } else {
+                score = 0;
+            }
+
+            if (score > highscore) {
+                highscore = score;
+                localStorage.setItem('highscore', highscore);
+            }
+
+            document.getElementById('score').textContent = score;
+            document.getElementById('highscore').textContent = highscore;
+
+            updateColorText();
+        }
+
+        // Funzione per resettare tutti i progressi
+        function resetGame() {
+            score = 0;
+            highscore = 0;
+            localStorage.removeItem('highscore');  // Rimuove il miglior punteggio da localStorage
+            document.getElementById('score').textContent = score;
+            document.getElementById('highscore').textContent = highscore;
+            updateColorText();  // Aggiorna il gioco
+        }
+
+        // Funzione per mostrare l'alert
+        function showAlert() {
+            alert("Su COLORATTENZIONE bisogna premere il quadrato dello stesso colore della scritta e non cosa dice la scritta. Il gioco tenterÃ  di ingannarvi!");
+        }
+
+        // Inizializza il gioco
         document.getElementById('highscore').textContent = highscore;
         updateColorText();
-        playAudioSequence();  // Avvia la sequenza audio
-    };
     </script>
 </body>
 </html>
