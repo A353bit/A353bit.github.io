@@ -33,7 +33,6 @@
       font-size: 2em;
       background-color: #fff;
       border: 2px solid #000;
-      cursor: pointer;
     }
     #message {
       margin-top: 20px;
@@ -43,12 +42,20 @@
     #start-button, #end-button, #show-scoreboard {
       padding: 10px 20px;
       font-size: 1.2em;
-      cursor: pointer;
       background-color: #007bff;
       color: white;
       border: none;
       border-radius: 5px;
       margin-top: 20px;
+    }
+    #resetGame {
+      margin-top: 20px;
+      background-color: #ff0000;
+      color: white;
+      padding: 10px 20px;
+      font-size: 1.2em;
+      border-radius: 5px;
+      border: none;
     }
     #input-container {
       margin-bottom: 20px;
@@ -77,7 +84,6 @@
       background-color: #ff0000;
       color: white;
       padding: 5px 10px;
-      cursor: pointer;
       border: none;
       margin-top: 10px;
     }
@@ -86,19 +92,23 @@
 <body>
 
   <div id="game-container">
-    <!-- Schermata di Inizio -->
-    <div id="start-screen">
-      <h1>Benvenuto al Gioco del Tris</h1>
-      <div id="input-container">
-        <label for="player-x">Nickname giocatore X:</label>
-        <input type="text" id="player-x" required>
-        <br><br>
-        <label for="player-o">Nickname giocatore O:</label>
-        <input type="text" id="player-o" required>
-      </div>
-      <button id="start-button">Inizia il Gioco</button>
-      <button id="show-scoreboard">Mostra scoreboard</button>
+<!-- schermata di inizio -->
+  <div id="start-screen">
+    <h1>Benvenuto al Gioco del Tris</h1>
+    <div id="input-container">
+      <label for="player-x">Nickname giocatore X:</label>
+      <input type="text" id="player-x" required>
+      <br><br>
+      <label for="player-o">Nickname giocatore O:</label>
+      <input type="text" id="player-o" required>
     </div>
+    <button id="start-button">Inizia il Gioco</button>
+    <button id="show-scoreboard">Mostra scoreboard</button>
+    <button id="resetGame">Resetta vittorie</button>
+  </div>
+
+</div>
+
 
     <!-- Griglia del Tris -->
     <div id="game">
@@ -134,6 +144,7 @@
     const showScoreboardButton = document.getElementById('show-scoreboard');
     const playerXInput = document.getElementById('player-x');
     const playerOInput = document.getElementById('player-o');
+    const resetGameButton = document.getElementById('resetGame'); // Pulsante di reset
     const cells = document.querySelectorAll('[data-cell]');
     const overlay = document.getElementById('overlay');
     const scoreList = document.getElementById('score-list');
@@ -188,6 +199,21 @@
     // Chiudi l'overlay della scoreboard
     closeOverlayButton.addEventListener('click', () => {
       overlay.style.display = 'none';
+    });
+
+    // Funzione per resettare i dati delle vittorie
+    resetGameButton.addEventListener('click', () => {
+      // Resetta i dati salvati nel localStorage
+      localStorage.removeItem('playersData');
+      
+      // Pulisce l'oggetto playersData in memoria
+      playersData = {};
+      
+      // Avvisa l'utente che i dati sono stati resettati
+      alert('Le vittorie sono state resettate!');
+      
+      // Aggiorna immediatamente la scoreboard per riflettere i cambiamenti
+      updateScoreboard();
     });
 
     function handleClick(e) {
@@ -248,6 +274,7 @@
 
     function updateScoreboard() {
       scoreList.innerHTML = '';  // Pulisce la lista
+      // Ordina i giocatori in ordine decrescente in base alle vittorie
       const sortedPlayers = Object.keys(playersData).sort((a, b) => playersData[b].wins - playersData[a].wins);
 
       sortedPlayers.forEach(player => {
@@ -260,8 +287,8 @@
     cells.forEach(cell => {
       cell.addEventListener('click', handleClick);
     });
-  </script>
+</script>
 
 </body>
 </html>
-          
+  
