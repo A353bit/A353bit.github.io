@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gioco del Tris</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f4f4f4;
+    }
+    #game-container {
+      text-align: center;
+    }
+    #game {
+      display: none;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 5px;
+      margin: 0 auto;
+    }
+    .cell {
+      width: 100px;
+      height: 100px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2em;
+      background-color: #fff;
+      border: 2px solid #000;
+      cursor: pointer;
+    }
+    #message {
+      margin-top: 20px;
+      font-size: 1.2em;
+      text-align: center;
+    }
+    #start-button, #end-button, #show-scoreboard {
+      padding: 10px 20px;
+      font-size: 1.2em;
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+    #input-container {
+      margin-bottom: 20px;
+    }
+    /* Stile per l'overlay della scoreboard */
+    #overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+    }
+    #overlay-content {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+      text-align: center;
+    }
+    #close-overlay {
+      background-color: #ff0000;
+      color: white;
+      padding: 5px 10px;
+      cursor: pointer;
+      border: none;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="game-container">
+    <!-- Schermata di Inizio -->
+    <div id="start-screen">
+      <h1>Benvenuto al Gioco del Tris</h1>
+      <div id="input-container">
+        <label for="player-x">Nickname giocatore X:</label>
+        <input type="text" id="player-x" required>
+        <br><br>
+        <label for="player-o">Nickname giocatore O:</label>
+        <input type="text" id="player-o" required>
+      </div>
+      <button id="start-button">Inizia il Gioco</button>
+      <button id="show-scoreboard">Mostra scoreboard</button>
+    </div>
+
+    <!-- Griglia del Tris -->
+    <div id="game">
+      <div class="cell" data-cell></div>
+      <div class="cell" data-cell></div>
+      <div class="cell" data-cell></div>
+      <div class="cell" data-cell></div>
+      <div class="cell" data-cell></div>
+      <div class="cell" data-cell></div>
+      <div class="cell" data-cell></div>
+      <div class="cell" data-cell></div>
+      <div class="cell" data-cell></div>
+    </div>
+    <div id="message"></div>
+    <button id="end-button" style="display: none;">Termina partita</button>
+  </div>
+
+  <!-- Overlay della scoreboard -->
+  <div id="overlay">
+    <div id="overlay-content">
+      <h2>Scoreboard</h2>
+      <ul id="score-list"></ul>
+      <button id="close-overlay">Chiudi</button>
+    </div>
+  </div>
+
+  <script>
+    const startScreen = document.getElementById('start-screen');
+    const game = document.getElementById('game');
+    const messageElement = document.getElementById('message');
+    const startButton = document.getElementById('start-button');
+    const endButton = document.getElementById('end-button');
+    const showScoreboardButton = document.getElementById('show-scoreboard');
+    const playerXInput = document.getElementById('player-x');
+    const playerOInput = document.getElementById('player-o');
+    const cells = document.querySelectorAll('[data-cell]');
+    const overlay = document.getElementById('overlay');
+    const scoreList = document.getElementById('score-list');
+    const closeOverlayButton = document.getElementById('close-overlay');
+    
+    let currentPlayer = 'X';
+    let gameActive = true;
+    let board = Array(9).fill(null);
+    
+    // Recupera i punteggi dal localStorage o imposta a 0
+    let playersData = JSON.parse(localStorage.getItem('playersData')) || {};
+
+    function getPlayerData(name) {
+      return playersData[name] || { wins: 0 };
+    }
+
+    function updatePlayerData(name, wins) {
+      playersData[name] = { wins };
+      localStorage.setItem('playersData', JSON.stringify(playersData));
+    }
+
+    // Mostra la schermata di gioco solo se i nickname sono stati inseriti
+    startButton.addEventListener('click', () => {
+      const playerXName = playerXInput.value.trim();
+      const playerOName = playerOInput.value.trim();
+
+      if (playerXName === '' || playerOName === '') {
+        alert('Inserisci entrambi i nickname!');
+        return;
+      }
+
+      startScreen.style.display = 'none';
+      game.style.display = 'grid';
+      endButton.style.display = 'inline-block';  // Mostra il pulsante "Termina partita"
+    });
+
+    endButton.addEventListener('click', () => {
+      // Nascondi la schermata di gioco e mostra la schermata iniziale
+      game.style.display = 'none';
+      startScreen.style.display = 'block';
+      endButton.style.display = 'none';
+      
+      alert('Dati salvati correttamente!');  // Avvisa l'utente che i dati sono stati salvati
+    });
+
+    // Mostra l'overlay della scoreboard
+    showScoreboardButton.addEventListener('click', () => {
+      overlay.style.display = 'flex';
+      updateScoreboard();  // Aggiorna la lista dei punteggi
+    });
+
+    // Chiudi l'overlay della scoreboard
+    closeOverlayButton.addEventListener('click', () => {
+      overlay.style.display = 'none';
+    });
+
+    function handleClick(e) {
+      const cell = e.target;
+      const cellIndex = Array.from(cells).indexOf(cell);
+
+      if (board[cellIndex] || !gameActive) return;
+
+      board[cellIndex] = currentPlayer;
+      cell.textContent = currentPlayer;
+
+      const playerXName = playerXInput.value.trim();
+      const playerOName = playerOInput.value.trim();
+
+      if (checkWin(currentPlayer)) {
+        messageElement.textContent = `Giocatore ${currentPlayer === 'X' ? playerXName : playerOName} ha vinto!`;
+        updateScore(currentPlayer === 'X' ? playerXName : playerOName);
+        gameActive = false;
+        setTimeout(resetGame, 2000); // Resetta il gioco dopo 2 secondi
+      } else if (board.every(cell => cell)) {
+        messageElement.textContent = 'Pareggio!';
+        gameActive = false;
+        setTimeout(resetGame, 2000); // Resetta il gioco dopo 2 secondi
+      } else {
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+      }
+    }
+
+    function checkWin(player) {
+      const winningCombinations = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6]
+      ];
+      return winningCombinations.some(combination => {
+        return combination.every(index => board[index] === player);
+      });
+    }
+
+    function updateScore(playerName) {
+      const playerData = getPlayerData(playerName);
+      playerData.wins++;
+      updatePlayerData(playerName, playerData.wins);
+    }
+
+    function resetGame() {
+      board.fill(null);
+      cells.forEach(cell => cell.textContent = '');
+      messageElement.textContent = '';
+      gameActive = true;
+      currentPlayer = 'X';
+    }
+
+    function updateScoreboard() {
+      scoreList.innerHTML = '';  // Pulisce la lista
+      const sortedPlayers = Object.keys(playersData).sort((a, b) => playersData[b].wins - playersData[a].wins);
+
+      sortedPlayers.forEach(player => {
+        const li = document.createElement('li');
+        li.textContent = `${player}: ${playersData[player].wins} vittorie`;
+        scoreList.appendChild(li);
+      });
+    }
+
+    cells.forEach(cell => {
+      cell.addEventListener('click', handleClick);
+    });
+  </script>
+
+</body>
+</html>
+          
