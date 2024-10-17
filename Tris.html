@@ -10,7 +10,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  height: 100vh; /* Usa l'altezza totale della finestra */
   margin: 0;
   background-color: #f4f4f4;
 }
@@ -25,10 +25,8 @@
 #game {
   display: none; /* Mostrato tramite JavaScript */
   grid-template-columns: repeat(3, 1fr); /* Usa frazioni per adattarsi */
-  grid-template-rows: repeat(3, 1fr);
   gap: 5px;
-  width: 90vw; /* Adatta alla larghezza della viewport */
-  max-width: 400px; /* Limite massimo per schermi più grandi */
+  width: 300px; /* Dimensione fissa per la griglia */
   margin: 20px auto; /* Margine automatico per centrare */
 }
 
@@ -40,6 +38,7 @@
   background-color: #fff;
   border: 2px solid #000;
   transition: background-color 0.3s; /* Transizione per l'effetto hover */
+  height: 100px; /* Altezza fissa per le celle */
 }
 
 .cell:hover {
@@ -107,12 +106,13 @@
 @media (max-width: 600px) {
   .cell {
     font-size: 1.5em; /* Dimensione del font più piccola */
+    height: 80px; /* Altezza più piccola per schermi piccoli */
   }
 
   #start-button, #end-button, #show-scoreboard, #resetGame {
     font-size: 1em; /* Dimensione del font più piccola per i pulsanti */
     padding: 8px 15px; /* Padding ridotto */
- }
+  }
 }
   </style>
 </head>
