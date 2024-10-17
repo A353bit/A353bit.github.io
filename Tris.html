@@ -11,6 +11,7 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      height: 90vh;
       margin: 0;
       background-color: #f4f4f4;
     }
@@ -149,11 +150,11 @@
     const overlay = document.getElementById('overlay');
     const scoreList = document.getElementById('score-list');
     const closeOverlayButton = document.getElementById('close-overlay');
-    
+
     let currentPlayer = 'X';
     let gameActive = true;
     let board = Array(9).fill(null);
-    
+
     // Recupera i punteggi dal localStorage o imposta a 0
     let playersData = JSON.parse(localStorage.getItem('playersData')) || {};
 
@@ -186,7 +187,7 @@
       game.style.display = 'none';
       startScreen.style.display = 'block';
       endButton.style.display = 'none';
-      
+
       alert('Dati salvati correttamente!');  // Avvisa l'utente che i dati sono stati salvati
     });
 
@@ -205,13 +206,13 @@
     resetGameButton.addEventListener('click', () => {
       // Resetta i dati salvati nel localStorage
       localStorage.removeItem('playersData');
-      
+
       // Pulisce l'oggetto playersData in memoria
       playersData = {};
-      
+
       // Avvisa l'utente che i dati sono stati resettati
       alert('Le vittorie sono state resettate!');
-      
+
       // Aggiorna immediatamente la scoreboard per riflettere i cambiamenti
       updateScoreboard();
     });
@@ -229,7 +230,7 @@
       const playerOName = playerOInput.value.trim();
 
       if (checkWin(currentPlayer)) {
-        messageElement.textContent = Giocatore ${currentPlayer === 'X' ? playerXName : playerOName} ha vinto!;
+        messageElement.textContent = `Giocatore ${currentPlayer === 'X' ? playerXName : playerOName} ha vinto!`;
         updateScore(currentPlayer === 'X' ? playerXName : playerOName);
         gameActive = false;
         setTimeout(resetGame, 2000); // Resetta il gioco dopo 2 secondi
@@ -279,7 +280,7 @@
 
       sortedPlayers.forEach(player => {
         const li = document.createElement('li');
-        li.textContent = ${player}: ${playersData[player].wins} vittorie;
+        li.textContent = `${player}: ${playersData[player].wins} vittorie`;
         scoreList.appendChild(li);
       });
     }
