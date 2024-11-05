@@ -33,7 +33,7 @@
         text-align: center;
     }
 
-    h1, p {
+    h1, h2, p {
         display: block;
     }
     
@@ -143,7 +143,7 @@
     </div>
     <button class="start-button" id="startButton">Inizia Gioco</button>
     <h1>ISTRUZIONI</h1>
-    <p>dovete premere il quadrato dello stesso colore della scritta. NON SEGUITE CIÒ CHE DICE LA SCRITTA, SOLO IL SUO COLORE. infatti il gioco ogni tanto vi inganna</p>
+    <h2>dovete premere il quadrato dello stesso colore della scritta. NON SEGUITE CIÒ CHE DICE LA SCRITTA, SOLO IL SUO COLORE. infatti il gioco ogni tanto vi inganna</h2>
     
     <!-- Testo del colore e i quadrati -->
     <div class="color-text" id="colorText">Rosso</div>
@@ -226,6 +226,7 @@
                 audio.play();
                 document.getElementById('startButton').style.display = 'none';
                 document.querySelector('h1').style.display = 'none';
+                document.querySelector('h2').style.display = 'none';
                 document.querySelector('p').style.display = 'none';
                 document.getElementById('colorText').style.display = 'block';
                 document.querySelector('.squares').style.display = 'flex';
