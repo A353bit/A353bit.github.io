@@ -227,7 +227,9 @@ function startGame() {
 
     // Nascondi h1 e p
     const header = document.querySelector('h1');
+    const header = document.querySelector('h2');
     const paragraph = document.querySelector('p');
+    if (header) header.style.display = 'none';
     if (header) header.style.display = 'none';
     if (paragraph) paragraph.style.display = 'none';
 
