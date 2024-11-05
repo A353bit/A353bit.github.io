@@ -137,11 +137,14 @@
 </style>
 </head>
 <body>
-
     <!-- Ad inizio gioco -->
+    <div id="loadingScreen" class="overlay" style="display:none;">
+        <p>Loading...</p>
+    </div>
     <button class="start-button" id="startButton">Inizia Gioco</button>
     <h1>ISTRUZIONI</h1>
     <p>dovete premere il quadrato dello stesso colore della scritta. NON SEGUITE CIÒ CHE DICE LA SCRITTA, SOLO IL SUO COLORE. infatti il gioco ogni tanto vi inganna</p>
+    
     <!-- Testo del colore e i quadrati -->
     <div class="color-text" id="colorText">Rosso</div>
     <div class="squares">
@@ -161,130 +164,110 @@
     <div class="timer" id="timer">Tempo: 180</div>
 
     <!-- Pulsante di reset -->
-    <button class="reset-button" id="resetButton">Ricomincia Gioco</button>
+    <button class="reset-button" id="resetButton" style="display:none;">Ricomincia Gioco</button>
 
     <!-- Audio -->
     <audio id="backgroundAudio" src="Oh Dam-Lsplash.m4a"></audio>
 
-   <script>
-// Variabili globali
-const colorMap = {
-    red: "Rosso",
-    yellow: "Giallo",
-    green: "Verde",
-    blue: "Blu"
-};
-const colors = ["red", "yellow", "green", "blue"];
-let currentColor = "";
-let displayedColorName = "";
-let score = 0;
-let highscore2 = localStorage.getItem('highscore2') || 0;  // Modificato
-const audio = document.getElementById('backgroundAudio');
-let gameInterval;
-let timerInterval;
-let timeLeft = 180;  // Durata del timer di gioco (180 secondi)
+    <script>
+        // Variabili globali
+        const colorMap = {
+            red: "Rosso",
+            yellow: "Giallo",
+            green: "Verde",
+            blue: "Blu"
+        };
+        const colors = ["red", "yellow", "green", "blue"];
+        let currentColor = "";
+        let displayedColorName = "";
+        let score = 0;
+        let highscore2 = localStorage.getItem('highscore2') || 0;
+        const audio = document.getElementById('backgroundAudio');
+        let gameInterval;
+        let timerInterval;
+        let timeLeft = 180;
 
-// Funzione per ottenere un colore casuale
-function randomColor() {
-    return colors[Math.floor(Math.random() * colors.length)];
-}
+        function randomColor() {
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
 
-// Aggiorna il testo del colore visualizzato
-function updateColorText() {
-    const realColor = randomColor();
-    const isTricky = Math.random() > 0.5;
-    currentColor = realColor;
-    displayedColorName = isTricky ? randomColor() : realColor;
-    document.getElementById('colorText').textContent = colorMap[displayedColorName];
-    document.getElementById('colorText').style.color = realColor;
-}
+        function updateColorText() {
+            const realColor = randomColor();
+            const isTricky = Math.random() > 0.5;
+            currentColor = realColor;
+            displayedColorName = isTricky ? randomColor() : realColor;
+            document.getElementById('colorText').textContent = colorMap[displayedColorName];
+            document.getElementById('colorText').style.color = realColor;
+        }
 
-// Funzione per controllare se il colore selezionato è corretto
-function checkColor(selectedColor) {
-    if (selectedColor === currentColor) {
-        score++;
-    } else {
-        score = 0;
-    }
+        function checkColor(selectedColor) {
+            if (selectedColor === currentColor) {
+                score++;
+            } else {
+                score = 0;
+            }
 
-    if (score > highscore2) {  // Modificato
-        highscore2 = score;  // Modificato
-        localStorage.setItem('highscore2', highscore2);  // Modificato
-    }
+            if (score > highscore2) {
+                highscore2 = score;
+                localStorage.setItem('highscore2', highscore2);
+            }
 
-    document.getElementById('score').textContent = score;
-    document.getElementById('highscore').textContent = highscore2;  // Modificato
+            document.getElementById('score').textContent = score;
+            document.getElementById('highscore').textContent = highscore2;
 
-    updateColorText();
-}
+            updateColorText();
+        }
 
-// Funzione per avviare il gioco
-function startGame() {
-    // Nascondi il pulsante di inizio
-    document.getElementById('startButton').style.display = 'none';
+        function startGame() {
+            document.getElementById('loadingScreen').style.display = "flex"; // Mostra il loading screen
+            audio.load();
+            audio.addEventListener("canplaythrough", function() {
+                document.getElementById('loadingScreen').style.display = "none"; // Nascondi il loading screen
+                audio.play();
+                document.getElementById('startButton').style.display = 'none';
+                document.querySelector('h1').style.display = 'none';
+                document.querySelector('p').style.display = 'none';
+                document.getElementById('colorText').style.display = 'block';
+                document.querySelector('.squares').style.display = 'flex';
+                document.querySelector('.scoreboard').style.display = 'block';
+                document.getElementById('timer').style.display = 'block';
 
-    // Nascondi h1 e p
-    const header = document.querySelector('h1');
-    const paragraph = document.querySelector('p');
-    if (header) header.style.display = 'none';
-    if (paragraph) paragraph.style.display = 'none';
+                score = 0;
+                timeLeft = 180;
+                document.getElementById('score').textContent = score;
+                document.getElementById('highscore').textContent = highscore2;
+                document.getElementById('timer').textContent = `Tempo: ${timeLeft}`;
 
-    // Mostra il gioco
-    document.getElementById('colorText').style.display = 'block';
-    document.querySelector('.squares').style.display = 'flex';
-    document.querySelector('.scoreboard').style.display = 'block';
-    document.getElementById('timer').style.display = 'block';
+                timerInterval = setInterval(updateTimer, 1000);
+            }, { once: true });
+        }
 
-    // Ripristina punteggio e timer
-    score = 0;
-    timeLeft = 180;  // Imposta il tempo a 180 secondi
-    document.getElementById('score').textContent = score;
-    document.getElementById('highscore').textContent = highscore2;
-    document.getElementById('timer').textContent = `Tempo: ${timeLeft}`;
+        function updateTimer() {
+            timeLeft--;
+            document.getElementById('timer').textContent = `Tempo: ${timeLeft}`;
 
-    audio.play();  // Riproduce l'audio
-    updateColorText();
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }
 
-    timerInterval = setInterval(updateTimer, 1000);  // Aggiorna il timer ogni secondo
+        function endGame() {
+            clearInterval(timerInterval);
+            document.getElementById('resetButton').style.display = 'block';
+            document.getElementById('colorText').style.display = 'none';
+            document.querySelector('.squares').style.display = 'none';
+            document.getElementById('timer').style.display = 'none';
+        }
 
-    audio.onended = function() {
-        audio.currentTime = 0;  // Riporta l'audio all'inizio
-    };
-}
+        function resetGame() {
+            document.getElementById('resetButton').style.display = 'none';
+            audio.currentTime = 0;
+            audio.play();
+            startGame();
+        }
 
-// Funzione per aggiornare il timer
-function updateTimer() {
-    timeLeft--;
-    document.getElementById('timer').textContent = `Tempo: ${timeLeft}`;
-
-    if (timeLeft <= 0) {
-        endGame();
-    }
-}
-
-// Funzione per terminare il gioco
-function endGame() {
-    clearInterval(gameInterval);
-    clearInterval(timerInterval);
-    document.getElementById('resetButton').style.display = 'block';  // Mostra il pulsante di reset
-    document.getElementById('colorText').style.display = 'none';  // Nasconde il gioco
-    document.querySelector('.squares').style.display = 'none';
-    document.getElementById('timer').style.display = 'none';
-    // Non fermiamo l'audio qui, continua a suonare anche dopo la fine del gioco
-}
-
-// Funzione per ricominciare il gioco
-function resetGame() {
-    document.getElementById('resetButton').style.display = 'none';  // Nasconde il pulsante di reset
-    audio.currentTime = 0;  // Riporta l'audio all'inizio
-    audio.play();  // Riparte l'audio
-    startGame();  // Ricomincia il gioco
-}
-
-// Associa le funzioni ai pulsanti
-document.getElementById('startButton').onclick = startGame;
-document.getElementById('resetButton').onclick = resetGame;
-
-</script>
-</body>
+        document.getElementById('startButton').onclick = startGame;
+        document.getElementById('resetButton').onclick = resetGame;
+    </script>
+    </body>
 </html>
