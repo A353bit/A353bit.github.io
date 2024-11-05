@@ -219,14 +219,14 @@
         }
 
         function startGame() {
+            document.getElementById('startButton').style.display = 'none';
+            document.querySelector('h1').style.display = 'none';
+            document.querySelector('h2').style.display = 'none';
             document.getElementById('loadingScreen').style.display = "flex"; // Mostra il loading screen
             audio.load();
             audio.addEventListener("canplaythrough", function() {
                 document.getElementById('loadingScreen').style.display = "none"; // Nascondi il loading screen
                 audio.play();
-                document.getElementById('startButton').style.display = 'none';
-                document.querySelector('h1').style.display = 'none';
-                document.querySelector('h2').style.display = 'none';
                 document.querySelector('p').style.display = 'none';
                 document.getElementById('colorText').style.display = 'block';
                 document.querySelector('.squares').style.display = 'flex';
