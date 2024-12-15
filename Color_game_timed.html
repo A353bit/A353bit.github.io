@@ -23,6 +23,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        transition: background-color 2s ease;
         background: linear-gradient(45deg, #32a842, #32a8a6);
         font-family: Arial, sans-serif;
     }
@@ -35,6 +36,10 @@
 
     h1, h2, p {
         display: block;
+    }
+
+    h3 {
+        display: none;
     }
     
     .color-text {
@@ -139,10 +144,11 @@
 <body>
     <!-- Ad inizio gioco -->
     <div id="loadingScreen" class="overlay" style="display:none;">
-        <p>Loading...</p>
+        <p>Caricamento...</p>
     </div>
     <button class="start-button" id="startButton">Inizia Gioco</button>
     <h1>ISTRUZIONI</h1>
+    <h3>se non vi ricordaste:</h3>
     <h2>dovete premere il quadrato dello stesso colore della scritta. NON SEGUITE CIÒ CHE DICE LA SCRITTA, SOLO IL SUO COLORE. infatti il gioco ogni tanto vi inganna</h2>
     
     <!-- Testo del colore e i quadrati -->
@@ -167,7 +173,7 @@
     <button class="reset-button" id="resetButton" style="display:none;">Ricomincia Gioco</button>
 
     <!-- Audio -->
-    <audio id="backgroundAudio" src="Oh Dam-Lsplash.m4a"></audio>
+    <audio id="backgroundAudio" src="Audio.m4a"></audio>
 
     <script>
         // Variabili globali
@@ -247,6 +253,14 @@
             timeLeft--;
             document.getElementById('timer').textContent = `Tempo: ${timeLeft}`;
 
+            if (timeLeft <= 120) {
+                document.body.style.background = "linear-gradient(45deg, #ffffff, #000000)";
+            }
+            
+            if (timeLeft <= 60) {
+                document.body.style.background = "linear-gradient(45deg, #000000, #ffffff)";;
+            }
+            
             if (timeLeft <= 0) {
                 endGame();
             }
@@ -258,6 +272,8 @@
             document.getElementById('colorText').style.display = 'none';
             document.querySelector('.squares').style.display = 'none';
             document.getElementById('timer').style.display = 'none';
+            document.getElementById('h3').style.display = 'block';
+            document.body.style.background = "#000000";
         }
 
         function resetGame() {
