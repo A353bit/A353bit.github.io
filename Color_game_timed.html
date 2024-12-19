@@ -254,12 +254,12 @@
             timeLeft--;
             document.getElementById('timer').textContent = `Tempo: ${timeLeft}`;
 
-            if (timeLeft <= 120) {
-                document.body.style.background = "linear-gradient(45deg, #ffffff, #000000)";
+            if (timeLeft <= 115.5) {
+                document.body.style.background = "linear-gradient(45deg, Gold, Goldenrod)";
             }
             
-            if (timeLeft <= 60) {
-                document.body.style.background = "linear-gradient(45deg, #000000, #ffffff)";;
+            if (timeLeft <= 64) {
+                document.body.style.background = "linear-gradient(45deg, Orange, OrangeRed)";;
             }
             
             if (timeLeft <= 0) {
@@ -274,7 +274,7 @@
             document.querySelector('.squares').style.display = 'none';
             document.getElementById('timer').style.display = 'none';
             document.getElementById('h3').style.display = 'block';
-            document.body.style.backgroundColor = "#000000";
+            document.body.style.backgroundColor = Red;
         }
 
         function resetGame() {
