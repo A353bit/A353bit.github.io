@@ -24,7 +24,7 @@
         justify-content: center;
         align-items: center;
         transition: background-color 0.5s ease;
-        background: linear-gradient(45deg, #32a842, #32a8a6);
+        background-color: black;
         font-family: Arial, sans-serif;
     }
 
@@ -225,10 +225,11 @@
         }
 
         function startGame() {
+            document.body.style.background = "linear-gradient(45deg, #32a842, #32a8a6)";
             document.getElementById('startButton').style.display = 'none';
             document.querySelector('h1').style.display = 'none';
             document.querySelector('h2').style.display = 'none';
-            document.getElementById('loadingScreen').style.display = "flex"; // Mostra il loading screen
+            document.getElementById('loadingScreen').style.display = "flex";// Mostra il loading screen
             audio.load();
             audio.addEventListener("canplaythrough", function() {
                 document.getElementById('loadingScreen').style.display = "none"; // Nascondi il loading screen
@@ -254,11 +255,11 @@
             document.getElementById('timer').textContent = `Tempo: ${timeLeft}`;
 
             if (timeLeft <= 120) {
-                document.html.style.background = "linear-gradient(45deg, #ffffff, #000000)";
+                document.body.style.background = "linear-gradient(45deg, #ffffff, #000000)";
             }
             
             if (timeLeft <= 60) {
-                document.html.style.background = "linear-gradient(45deg, #000000, #ffffff)";;
+                document.body.style.background = "linear-gradient(45deg, #000000, #ffffff)";;
             }
             
             if (timeLeft <= 0) {
@@ -273,7 +274,7 @@
             document.querySelector('.squares').style.display = 'none';
             document.getElementById('timer').style.display = 'none';
             document.getElementById('h3').style.display = 'block';
-            document.html.style.backgroundColor = "#000000";
+            document.body.style.backgroundColor = "#000000";
         }
 
         function resetGame() {
