@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CASSA D'ARGENTO</title>
+</head>
+<body>
+
+<button onclick="mostraDialogo()">APRI CASSA</button>
+
+<dialog id="dialogo">
+  <h2>HAI VINTO:Stocazzo d'oro</h2>
+  <p>Un potentissimo cazzo d'oro creato per sparare sburra d'oro.</p>
+  <button onclick="chiudiDialogo()">YIPPE!</button>
+</dialog>
+
+<script>
+function mostraDialogo() {
+  var dialogo = document.getElementById("dialogo");
+  dialogo.showModal();
+}
+
+function chiudiDialogo() {
+  var dialogo = document.getElementById("dialogo");
+  dialogo.close();
+}
+</script>
+
+</body>
+</html>
