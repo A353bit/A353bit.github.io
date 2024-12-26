@@ -15,53 +15,77 @@
       color: white;
       font-family: Arial, sans-serif;
       overflow: hidden;
+      flex-direction: column;
     }
     #game-area {
-      width: 300px;
-      height: 300px;
+      width: 10%; /* Rettangolo più piccolo */
+      aspect-ratio: 1;
       border: 2px solid red;
       position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
     }
     #cursor {
-      width: 20px;
-      height: 20px;
+      width: 15px;
+      height: 15px;
       background-color: green;
       border-radius: 50%;
       position: absolute;
     }
     #message {
-      margin-top: 20px;
+      margin: 10px;
       text-align: center;
+      font-size: 1.2em;
+    }
+    #penalty-bar-container {
+      width: 80%;
+      height: 20px;
+      background-color: #333;
+      border: 2px solid white;
+      margin-top: 10px;
+      position: relative;
+    }
+    #penalty-bar {
+      height: 100%;
+      background-color: red;
+      width: 0%;
     }
   </style>
 </head>
 <body>
-  <div>
-    <div id="game-area">
-      <div id="cursor"></div>
-    </div>
-    <div id="message">Mantieni il cursore al centro!</div>
+  <div id="game-area">
+    <div id="cursor"></div>
+  </div>
+  <div id="message">Mantieni il cursore nel rettangolo!</div>
+  <div id="penalty-bar-container">
+    <div id="penalty-bar"></div>
   </div>
 
   <script>
     const cursor = document.getElementById("cursor");
     const gameArea = document.getElementById("game-area");
     const message = document.getElementById("message");
+    const penaltyBar = document.getElementById("penalty-bar");
 
-    let timer = 60; // Durata totale del minigioco
+    let timerMain = 60; // Timer principale
+    let penaltyTime = 0; // Timer penalità
     let isInArea = true;
+    const penaltyMax = 5; // Penalità massima in secondi
+    const penaltyRecovery = 0.1; // Recupero penalità per secondo
+    const penaltyIncrement = 1; // Penalità aggiunta per secondo fuori area
 
-    // Funzione per controllare se il cursore è nell'area
+    // Funzione per verificare la posizione disturbata del cursore
     function checkPosition(x, y) {
       const rect = gameArea.getBoundingClientRect();
-      isInArea = x > 0 && x < rect.width && y > 0 && y < rect.height;
+
+      // Disturbo casuale
+      const disturbedX = x + (Math.random() * 20 - 10);
+      const disturbedY = y + (Math.random() * 20 - 10);
+
+      // Verifica se il cursore è nell'area
+      isInArea = disturbedX > 0 && disturbedX < rect.width && disturbedY > 0 && disturbedY < rect.height;
 
       // Sposta il cursore
-      cursor.style.left = `${x}px`;
-      cursor.style.top = `${y}px`;
+      cursor.style.left = `${Math.max(0, Math.min(rect.width - 15, disturbedX))}px`;
+      cursor.style.top = `${Math.max(0, Math.min(rect.height - 15, disturbedY))}px`;
     }
 
     // Eventi per il mouse
@@ -72,7 +96,7 @@
       checkPosition(x, y);
     });
 
-    // Eventi per il tocco (dispositivi mobili)
+    // Eventi per il tocco (mobile)
     gameArea.addEventListener("touchmove", (event) => {
       const rect = gameArea.getBoundingClientRect();
       const touch = event.touches[0];
@@ -83,23 +107,33 @@
 
     // Timer di gioco
     const gameInterval = setInterval(() => {
-      if (!isInArea) {
-        timer -= 2; // Penalità se il cursore è fuori
-      } else {
-        timer--; // Scorre normalmente
+      // Aggiornamento del timer principale
+      timerMain--;
+      if (timerMain <= 0) {
+        clearInterval(gameInterval);
+        message.textContent = isInArea ? "Hai vinto!" : "Game Over!";
+        message.style.color = isInArea ? "green" : "red";
+        return;
       }
 
-      if (timer <= 0) {
-        clearInterval(gameInterval);
-        if (isInArea) {
-          message.textContent = "Hai vinto!";
-          message.style.color = "green";
-        } else {
-          message.textContent = "Game Over!";
-          message.style.color = "red";
-        }
+      // Aggiornamento della penalità
+      if (!isInArea) {
+        penaltyTime += penaltyIncrement; // Aumenta la penalità
       } else {
-        message.textContent = `Tempo rimanente: ${timer} secondi`;
+        penaltyTime = Math.max(0, penaltyTime - penaltyRecovery); // Recupera penalità
+      }
+
+      // Controlla la barra della penalità
+      const penaltyPercentage = (penaltyTime / penaltyMax) * 100;
+      penaltyBar.style.width = `${Math.min(100, penaltyPercentage)}%`;
+
+      // Game Over se la penalità massima è raggiunta
+      if (penaltyTime >= penaltyMax) {
+        clearInterval(gameInterval);
+        message.textContent = "Game Over!";
+        message.style.color = "red";
+      } else {
+        message.textContent = `Tempo rimanente: ${timerMain} secondi`;
       }
     }, 1000);
   </script>
