@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pressure Minigame</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+    #game-area {
+      width: 300px;
+      height: 300px;
+      border: 2px solid red;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #cursor {
+      width: 20px;
+      height: 20px;
+      background-color: green;
+      border-radius: 50%;
+      position: absolute;
+    }
+    #message {
+      margin-top: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <div id="game-area">
+      <div id="cursor"></div>
+    </div>
+    <div id="message">Mantieni il cursore al centro!</div>
+  </div>
+
+  <script>
+    const cursor = document.getElementById("cursor");
+    const gameArea = document.getElementById("game-area");
+    const message = document.getElementById("message");
+
+    let timer = 60; // Durata totale del minigioco
+    let isInArea = true;
+
+    // Funzione per controllare se il cursore è nell'area
+    function checkPosition(x, y) {
+      const rect = gameArea.getBoundingClientRect();
+      isInArea = x > 0 && x < rect.width && y > 0 && y < rect.height;
+
+      // Sposta il cursore
+      cursor.style.left = `${x}px`;
+      cursor.style.top = `${y}px`;
+    }
+
+    // Eventi per il mouse
+    gameArea.addEventListener("mousemove", (event) => {
+      const rect = gameArea.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      checkPosition(x, y);
+    });
+
+    // Eventi per il tocco (dispositivi mobili)
+    gameArea.addEventListener("touchmove", (event) => {
+      const rect = gameArea.getBoundingClientRect();
+      const touch = event.touches[0];
+      const x = touch.clientX - rect.left;
+      const y = touch.clientY - rect.top;
+      checkPosition(x, y);
+    });
+
+    // Timer di gioco
+    const gameInterval = setInterval(() => {
+      if (!isInArea) {
+        timer -= 2; // Penalità se il cursore è fuori
+      } else {
+        timer--; // Scorre normalmente
+      }
+
+      if (timer <= 0) {
+        clearInterval(gameInterval);
+        if (isInArea) {
+          message.textContent = "Hai vinto!";
+          message.style.color = "green";
+        } else {
+          message.textContent = "Game Over!";
+          message.style.color = "red";
+        }
+      } else {
+        message.textContent = `Tempo rimanente: ${timer} secondi`;
+      }
+    }, 1000);
+  </script>
+</body>
+</html>
