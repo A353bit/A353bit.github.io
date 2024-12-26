@@ -38,6 +38,7 @@
       aspect-ratio: 1;
       border: 2px solid red;
       position: relative;
+      overflow: hidden; /* Assicurati che il rettangolo non superi il suo limite */
     }
     #cursor {
       width: 15px;
@@ -45,6 +46,7 @@
       background-color: green;
       border-radius: 50%;
       position: absolute;
+      cursor: none; /* Nasconde il cursore */
     }
     #message {
       margin: 10px;
@@ -102,39 +104,39 @@
     const penaltyRecovery = 0.1; // Recupero penalità per secondo
     const penaltyIncrement = 1; // Penalità aggiunta per secondo fuori area
 
-    let cursorX = 50;
-    let cursorY = 50;
     let isMouseDown = false; // Flag per tenere premuto il mouse o il dito
+    let rectBounds, cursorX, cursorY;
 
     // Inizializzazione del gioco
     startBtn.addEventListener("click", () => {
       startScreen.style.display = "none";
       gameArea.style.display = "flex";
+      document.body.style.cursor = "none"; // Nascondi il cursore dopo l'inizio
       startGame();
     });
 
     function startGame() {
+      cursorX = rect.offsetWidth / 2;
+      cursorY = rect.offsetHeight / 2;
+
       // Movimentazione casuale del cursore
       const disturbanceInterval = 50; // Aggiornamento ogni 50 ms
       setInterval(() => {
-        const rectBounds = rect.getBoundingClientRect();
-
-        // Logica di fuga
-        const centerX = rectBounds.left + rectBounds.width / 2;
-        const centerY = rectBounds.top + rectBounds.height / 2;
+        rectBounds = rect.getBoundingClientRect();
 
         if (isMouseDown) {
-          // Movimenti casuali mentre il mouse/dito è premuto
-          cursorX += (Math.random() - 0.5) * 40; // Random per muoversi in tutte le direzioni
-          cursorY += (Math.random() - 0.5) * 40;
+          const mouseX = cursorX + (Math.random() - 0.5) * 40; // Muoversi in tutte le direzioni
+          const mouseY = cursorY + (Math.random() - 0.5) * 40;
 
           // Assicurati che il cursore rimanga all'interno del rettangolo
-          cursorX = Math.max(0, Math.min(rectBounds.width - 15, cursorX));
-          cursorY = Math.max(0, Math.min(rectBounds.height - 15, cursorY));
-        }
+          cursorX = Math.max(0, Math.min(rectBounds.width - 15, mouseX));
+          cursorY = Math.max(0, Math.min(rectBounds.height - 15, mouseY));
 
-        // Verifica se il cursore è dentro o fuori il rettangolo
-        isInArea = cursorX > 0 && cursorX < rectBounds.width && cursorY > 0 && cursorY < rectBounds.height;
+          // Blocca il movimento del mouse del computer per evitare fuori dal browser
+          window.addEventListener('mousemove', (e) => {
+            e.preventDefault(); // Blocca il movimento del mouse del computer
+          });
+        }
 
         // Muovi il cursore
         cursor.style.left = `${cursorX}px`;
