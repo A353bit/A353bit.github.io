@@ -16,7 +16,6 @@
       font-family: Arial, sans-serif;
       overflow: hidden;
       flex-direction: column;
-      cursor: none; /* Nasconde il cursore reale */
     }
     #start-screen, #game-area {
       display: flex;
@@ -31,14 +30,13 @@
       color: #fff;
     }
     #game-area {
-      display: none; /* Nascondi inizialmente il gioco */
+      display: none;
     }
     #game-area .rect {
-      width: 10%;
-      aspect-ratio: 1;
+      width: 200px;
+      height: 200px;
       border: 2px solid red;
       position: relative;
-      overflow: hidden; /* Assicurati che il rettangolo non superi il suo limite */
     }
     #cursor {
       width: 15px;
@@ -46,12 +44,9 @@
       background-color: green;
       border-radius: 50%;
       position: absolute;
-      cursor: none; /* Nasconde il cursore */
-    }
-    #message {
-      margin: 10px;
-      text-align: center;
-      font-size: 1.2em;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
     }
     #penalty-bar-container {
       width: 80%;
@@ -66,13 +61,18 @@
       background-color: red;
       width: 0%;
     }
+    #message {
+      margin: 10px;
+      text-align: center;
+      font-size: 1.2em;
+    }
   </style>
 </head>
 <body>
   <!-- Schermata di inizio -->
   <div id="start-screen">
-    <h1>Benvenuto nel minigioco Pressure</h1>
-    <p>Cerca di mantenere il cursore nel rettangolo per vincere!</p>
+    <h1>Pressure Minigame</h1>
+    <p>Mantieni il cursore nel rettangolo!</p>
     <button id="start-btn">Inizia</button>
   </div>
 
@@ -97,86 +97,92 @@
     const message = document.getElementById("message");
     const penaltyBar = document.getElementById("penalty-bar");
 
-    let timerMain = 60; // Timer principale
-    let penaltyTime = 0; // Timer penalità
-    let isInArea = true;
-    const penaltyMax = 5; // Penalità massima in secondi
-    const penaltyRecovery = 0.1; // Recupero penalità per secondo
-    const penaltyIncrement = 1; // Penalità aggiunta per secondo fuori area
-
-    let isMouseDown = false; // Flag per tenere premuto il mouse o il dito
-    let rectBounds, cursorX, cursorY;
+    let isMouseDown = false;
+    let cursorX = 0, cursorY = 0;
+    let penaltyTime = 0, mainTimer = 60;
+    const penaltyMax = 5; // Penalità massima
+    const penaltyIncrement = 1; // Penalità per secondo fuori
+    const penaltyRecovery = 0.1; // Recupero per secondo dentro
 
     // Inizializzazione del gioco
     startBtn.addEventListener("click", () => {
       startScreen.style.display = "none";
       gameArea.style.display = "flex";
-      document.body.style.cursor = "none"; // Nascondi il cursore dopo l'inizio
+      document.body.requestPointerLock(); // Blocca il cursore del computer
       startGame();
     });
 
     function startGame() {
-      cursorX = rect.offsetWidth / 2;
-      cursorY = rect.offsetHeight / 2;
+      cursor.style.left = "50%";
+      cursor.style.top = "50%";
 
-      // Movimentazione casuale del cursore
-      const disturbanceInterval = 50; // Aggiornamento ogni 50 ms
-      setInterval(() => {
-        rectBounds = rect.getBoundingClientRect();
-
-        if (isMouseDown) {
-          const mouseX = cursorX + (Math.random() - 0.5) * 40; // Muoversi in tutte le direzioni
-          const mouseY = cursorY + (Math.random() - 0.5) * 40;
-
-          // Assicurati che il cursore rimanga all'interno del rettangolo
-          cursorX = Math.max(0, Math.min(rectBounds.width - 15, mouseX));
-          cursorY = Math.max(0, Math.min(rectBounds.height - 15, mouseY));
-
-          // Blocca il movimento del mouse del computer per evitare fuori dal browser
-          window.addEventListener('mousemove', (e) => {
-            e.preventDefault(); // Blocca il movimento del mouse del computer
-          });
-        }
-
-        // Muovi il cursore
-        cursor.style.left = `${cursorX}px`;
-        cursor.style.top = `${cursorY}px`;
-      }, disturbanceInterval);
+      // Movimento del cursore
+      document.addEventListener("mousemove", handleMouseMove);
 
       // Timer di gioco
       const gameInterval = setInterval(() => {
-        timerMain--;
+        mainTimer--;
 
-        if (timerMain <= 0) {
+        // Controlla il tempo rimasto
+        if (mainTimer <= 0) {
           clearInterval(gameInterval);
-          message.textContent = isInArea ? "Hai vinto!" : "Game Over!";
-          message.style.color = isInArea ? "green" : "red";
-          return;
+          endGame(true);
         }
 
-        // Aggiornamento della penalità
-        if (!isInArea) {
-          penaltyTime += penaltyIncrement; // Aumenta la penalità
+        // Aggiorna la penalità
+        const isInRect = checkCursorInRect();
+        if (!isInRect) {
+          penaltyTime += penaltyIncrement;
         } else {
-          penaltyTime = Math.max(0, penaltyTime - penaltyRecovery); // Recupera penalità
+          penaltyTime = Math.max(0, penaltyTime - penaltyRecovery);
         }
 
-        // Controllo barra di penalità
-        const penaltyPercentage = (penaltyTime / penaltyMax) * 100;
-        penaltyBar.style.width = `${Math.min(100, penaltyPercentage)}%`;
+        // Aggiorna la barra della penalità
+        const penaltyPercentage = Math.min(100, (penaltyTime / penaltyMax) * 100);
+        penaltyBar.style.width = `${penaltyPercentage}%`;
 
-        // Game Over se la penalità massima è raggiunta
+        // Controlla se la penalità massima è raggiunta
         if (penaltyTime >= penaltyMax) {
           clearInterval(gameInterval);
-          message.textContent = "Game Over!";
-          message.style.color = "red";
-        } else {
-          message.textContent = `Tempo rimanente: ${timerMain} secondi`;
+          endGame(false);
         }
+
+        message.textContent = `Tempo rimanente: ${mainTimer}s`;
       }, 1000);
     }
 
-    // Gestione mouse e tocco per mantenere il cursore nel rettangolo
+    function handleMouseMove(event) {
+      if (!isMouseDown) return; // Sposta il cursore solo se il mouse è premuto
+
+      const movementX = event.movementX || 0;
+      const movementY = event.movementY || 0;
+
+      cursorX += movementX;
+      cursorY += movementY;
+
+      cursor.style.left = `${cursorX}px`;
+      cursor.style.top = `${cursorY}px`;
+    }
+
+    function checkCursorInRect() {
+      const rectBounds = rect.getBoundingClientRect();
+      const cursorBounds = cursor.getBoundingClientRect();
+
+      return (
+        cursorBounds.left >= rectBounds.left &&
+        cursorBounds.right <= rectBounds.right &&
+        cursorBounds.top >= rectBounds.top &&
+        cursorBounds.bottom <= rectBounds.bottom
+      );
+    }
+
+    function endGame(isVictory) {
+      document.exitPointerLock(); // Rilascia il blocco del puntatore
+      message.textContent = isVictory ? "Hai vinto!" : "Game Over!";
+      message.style.color = isVictory ? "green" : "red";
+      document.removeEventListener("mousemove", handleMouseMove);
+    }
+
     document.addEventListener("mousedown", () => {
       isMouseDown = true;
     });
