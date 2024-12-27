@@ -99,13 +99,17 @@
     const penaltyRecovery = 0.1; 
     const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
+    let vibrationInterval;
+    let chaoticMovementInterval;
+
     startBtn.addEventListener("click", () => {
       startScreen.style.display = "none";
       gameArea.style.display = "flex";
 
       if (!isMobile) {
-        document.body.requestPointerLock(); 
+        document.body.requestPointerLock();
       }
+
       startGame();
     });
 
@@ -123,11 +127,15 @@
         document.addEventListener("mousemove", handleMouseMove);
       }
 
+      vibrationInterval = setInterval(vibrateCursor, 50); 
+      chaoticMovementInterval = setInterval(chaoticMovement, 100);
+
       const gameInterval = setInterval(() => {
         mainTimer--;
 
         if (mainTimer <= 0) {
           clearInterval(gameInterval);
+          clearGameIntervals();
           endGame(true);
         }
 
@@ -143,9 +151,10 @@
 
         if (penaltyTime >= penaltyMax) {
           clearInterval(gameInterval);
+          clearGameIntervals();
           endGame(false);
         }
-      }, 1000);
+      }, 10);
     }
 
     function handleMouseMove(event) {
@@ -154,16 +163,11 @@
       const movementX = event.movementX || 0;
       const movementY = event.movementY || 0;
 
-      const rectBounds = rect.getBoundingClientRect();
-      const cursorX = cursor.offsetLeft + movementX;
-      const cursorY = cursor.offsetTop + movementY;
+      const newX = cursor.offsetLeft + movementX;
+      const newY = cursor.offsetTop + movementY;
 
-      if (cursorX > 0 && cursorX < rectBounds.width) {
-        cursor.style.left = `${cursorX}px`;
-      }
-      if (cursorY > 0 && cursorY < rectBounds.height) {
-        cursor.style.top = `${cursorY}px`;
-      }
+      cursor.style.left = `${newX}px`;
+      cursor.style.top = `${newY}px`;
     }
 
     function handleTouchStart(event) {
@@ -174,16 +178,8 @@
       if (!isDragging || event.touches.length === 0) return;
 
       const touch = event.touches[0];
-      const rectBounds = rect.getBoundingClientRect();
-      const touchX = touch.clientX - rectBounds.left;
-      const touchY = touch.clientY - rectBounds.top;
-
-      if (touchX > 0 && touchX < rectBounds.width) {
-        cursor.style.left = `${touchX}px`;
-      }
-      if (touchY > 0 && touchY < rectBounds.height) {
-        cursor.style.top = `${touchY}px`;
-      }
+      cursor.style.left = `${touch.clientX}px`;
+      cursor.style.top = `${touch.clientY}px`;
     }
 
     function checkCursorInRect() {
@@ -198,9 +194,36 @@
       );
     }
 
+    function vibrateCursor() {
+      const xOffset = Math.random() * 4 - 2;
+      const yOffset = Math.random() * 4 - 2;
+
+      const currentX = parseFloat(cursor.style.left || "50%");
+      const currentY = parseFloat(cursor.style.top || "50%");
+
+      cursor.style.left = `${currentX + xOffset}px`;
+      cursor.style.top = `${currentY + yOffset}px`;
+    }
+
+    function chaoticMovement() {
+      const randomX = Math.random() * 20 - 10;
+      const randomY = Math.random() * 20 - 10;
+
+      const currentX = parseFloat(cursor.style.left || "50%");
+      const currentY = parseFloat(cursor.style.top || "50%");
+
+      cursor.style.left = `${currentX + randomX}px`;
+      cursor.style.top = `${currentY + randomY}px`;
+    }
+
+    function clearGameIntervals() {
+      clearInterval(vibrationInterval);
+      clearInterval(chaoticMovementInterval);
+    }
+
     function endGame(isVictory) {
       if (!isMobile) {
-        document.exitPointerLock(); 
+        document.exitPointerLock();
       }
       alert(isVictory ? "Hai vinto!" : "Game Over!");
     }
