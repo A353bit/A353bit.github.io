@@ -123,7 +123,7 @@
         document.addEventListener("mousemove", handleMouseMove);
       }
 
-      chaoticMovementInterval = setInterval(chaoticMovement, 100);
+      chaoticMovementInterval = setInterval(chaoticMovement, 50);
       timerInterval = setInterval(updateTimers, 1000);
     }
 
@@ -157,18 +157,24 @@
     }
 
     function chaoticMovement() {
-      if (isDragging) return;
+      const rectBounds = rect.getBoundingClientRect();
+      const cursorBounds = cursor.getBoundingClientRect();
 
-      const randomX = Math.random() * 20 - 10;
-      const randomY = Math.random() * 20 - 10;
+      const randomX = Math.random() * 10 - 5;
+      const randomY = Math.random() * 10 - 5;
 
-      const currentX = parseFloat(cursor.style.left || "50%");
-      const currentY = parseFloat(cursor.style.top || "50%");
+      const newX = cursorBounds.left + randomX;
+      const newY = cursorBounds.top + randomY;
 
-      cursor.style.left = `${currentX + randomX}px`;
-      cursor.style.top = `${currentY + randomY}px`;
-
-      keepCursorInBounds();
+      if (
+        newX >= rectBounds.left &&
+        newX <= rectBounds.right &&
+        newY >= rectBounds.top &&
+        newY <= rectBounds.bottom
+      ) {
+        cursor.style.left = `${newX}px`;
+        cursor.style.top = `${newY}px`;
+      }
     }
 
     function keepCursorInBounds() {
