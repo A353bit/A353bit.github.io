@@ -99,16 +99,12 @@
     const penaltyRecovery = 0.1; 
     const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
-    let vibrationInterval;
     let chaoticMovementInterval;
+    let timerInterval;
 
     startBtn.addEventListener("click", () => {
       startScreen.style.display = "none";
       gameArea.style.display = "flex";
-
-      if (!isMobile) {
-        document.body.requestPointerLock();
-      }
 
       startGame();
     });
@@ -127,34 +123,8 @@
         document.addEventListener("mousemove", handleMouseMove);
       }
 
-      vibrationInterval = setInterval(vibrateCursor, 50); 
       chaoticMovementInterval = setInterval(chaoticMovement, 100);
-
-      const gameInterval = setInterval(() => {
-        mainTimer--;
-
-        if (mainTimer <= 0) {
-          clearInterval(gameInterval);
-          clearGameIntervals();
-          endGame(true);
-        }
-
-        const isInRect = checkCursorInRect();
-        if (!isInRect) {
-          penaltyTime += penaltyIncrement;
-        } else {
-          penaltyTime = Math.max(0, penaltyTime - penaltyRecovery);
-        }
-
-        const penaltyPercentage = Math.min(100, (penaltyTime / penaltyMax) * 100);
-        penaltyBar.style.width = `${penaltyPercentage}%`;
-
-        if (penaltyTime >= penaltyMax) {
-          clearInterval(gameInterval);
-          clearGameIntervals();
-          endGame(false);
-        }
-      }, 1000);
+      timerInterval = setInterval(updateTimers, 1000);
     }
 
     function handleMouseMove(event) {
@@ -168,6 +138,8 @@
 
       cursor.style.left = `${newX}px`;
       cursor.style.top = `${newY}px`;
+
+      keepCursorInBounds();
     }
 
     function handleTouchStart(event) {
@@ -180,6 +152,57 @@
       const touch = event.touches[0];
       cursor.style.left = `${touch.clientX}px`;
       cursor.style.top = `${touch.clientY}px`;
+
+      keepCursorInBounds();
+    }
+
+    function chaoticMovement() {
+      if (isDragging) return;
+
+      const randomX = Math.random() * 20 - 10;
+      const randomY = Math.random() * 20 - 10;
+
+      const currentX = parseFloat(cursor.style.left || "50%");
+      const currentY = parseFloat(cursor.style.top || "50%");
+
+      cursor.style.left = `${currentX + randomX}px`;
+      cursor.style.top = `${currentY + randomY}px`;
+
+      keepCursorInBounds();
+    }
+
+    function keepCursorInBounds() {
+      const rectBounds = rect.getBoundingClientRect();
+      const cursorBounds = cursor.getBoundingClientRect();
+
+      if (cursorBounds.left < rectBounds.left) cursor.style.left = `${rectBounds.left}px`;
+      if (cursorBounds.right > rectBounds.right) cursor.style.left = `${rectBounds.right - cursorBounds.width}px`;
+      if (cursorBounds.top < rectBounds.top) cursor.style.top = `${rectBounds.top}px`;
+      if (cursorBounds.bottom > rectBounds.bottom) cursor.style.top = `${rectBounds.bottom - cursorBounds.height}px`;
+    }
+
+    function updateTimers() {
+      mainTimer--;
+
+      const isInRect = checkCursorInRect();
+      if (!isInRect) {
+        penaltyTime += penaltyIncrement;
+      } else {
+        penaltyTime = Math.max(0, penaltyTime - penaltyRecovery);
+      }
+
+      const penaltyPercentage = Math.min(100, (penaltyTime / penaltyMax) * 100);
+      penaltyBar.style.width = `${penaltyPercentage}%`;
+
+      if (penaltyTime >= penaltyMax) {
+        clearGameIntervals();
+        endGame(false);
+      }
+
+      if (mainTimer <= 0) {
+        clearGameIntervals();
+        endGame(true);
+      }
     }
 
     function checkCursorInRect() {
@@ -194,37 +217,12 @@
       );
     }
 
-    function vibrateCursor() {
-      const xOffset = Math.random() * 4 - 2;
-      const yOffset = Math.random() * 4 - 2;
-
-      const currentX = parseFloat(cursor.style.left || "50%");
-      const currentY = parseFloat(cursor.style.top || "50%");
-
-      cursor.style.left = `${currentX + xOffset}px`;
-      cursor.style.top = `${currentY + yOffset}px`;
-    }
-
-    function chaoticMovement() {
-      const randomX = Math.random() * 20 - 10;
-      const randomY = Math.random() * 20 - 10;
-
-      const currentX = parseFloat(cursor.style.left || "50%");
-      const currentY = parseFloat(cursor.style.top || "50%");
-
-      cursor.style.left = `${currentX + randomX}px`;
-      cursor.style.top = `${currentY + randomY}px`;
-    }
-
     function clearGameIntervals() {
-      clearInterval(vibrationInterval);
       clearInterval(chaoticMovementInterval);
+      clearInterval(timerInterval);
     }
 
     function endGame(isVictory) {
-      if (!isMobile) {
-        document.exitPointerLock();
-      }
       alert(isVictory ? "Hai vinto!" : "Game Over!");
     }
   </script>
