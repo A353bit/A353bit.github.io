@@ -103,12 +103,16 @@
     const penaltyMax = 5; // Penalità massima
     const penaltyIncrement = 1; // Penalità per secondo fuori
     const penaltyRecovery = 0.1; // Recupero per secondo dentro
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent); // Rileva mobile
 
     // Inizializzazione del gioco
     startBtn.addEventListener("click", () => {
       startScreen.style.display = "none";
       gameArea.style.display = "flex";
-      document.body.requestPointerLock(); // Blocca il cursore del computer
+
+      if (!isMobile) {
+        document.body.requestPointerLock(); // Blocca il cursore solo su desktop
+      }
       startGame();
     });
 
@@ -117,7 +121,15 @@
       cursor.style.top = "50%";
 
       // Movimento del cursore
-      document.addEventListener("mousemove", handleMouseMove);
+      if (isMobile) {
+        document.addEventListener("touchmove", handleTouchMove);
+        document.addEventListener("touchstart", () => (isMouseDown = true));
+        document.addEventListener("touchend", () => (isMouseDown = false));
+      } else {
+        document.addEventListener("mousemove", handleMouseMove);
+        document.addEventListener("mousedown", () => (isMouseDown = true));
+        document.addEventListener("mouseup", () => (isMouseDown = false));
+      }
 
       // Timer di gioco
       const gameInterval = setInterval(() => {
@@ -164,6 +176,18 @@
       cursor.style.top = `${cursorY}px`;
     }
 
+    function handleTouchMove(event) {
+      if (!isMouseDown || event.touches.length === 0) return;
+
+      const touch = event.touches[0];
+      const rectBounds = rect.getBoundingClientRect();
+      cursorX = touch.clientX - rectBounds.left;
+      cursorY = touch.clientY - rectBounds.top;
+
+      cursor.style.left = `${cursorX}px`;
+      cursor.style.top = `${cursorY}px`;
+    }
+
     function checkCursorInRect() {
       const rectBounds = rect.getBoundingClientRect();
       const cursorBounds = cursor.getBoundingClientRect();
@@ -177,27 +201,14 @@
     }
 
     function endGame(isVictory) {
-      document.exitPointerLock(); // Rilascia il blocco del puntatore
+      if (!isMobile) {
+        document.exitPointerLock(); // Rilascia il blocco del puntatore
+      }
       message.textContent = isVictory ? "Hai vinto!" : "Game Over!";
       message.style.color = isVictory ? "green" : "red";
       document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("touchmove", handleTouchMove);
     }
-
-    document.addEventListener("mousedown", () => {
-      isMouseDown = true;
-    });
-
-    document.addEventListener("mouseup", () => {
-      isMouseDown = false;
-    });
-
-    document.addEventListener("touchstart", () => {
-      isMouseDown = true;
-    });
-
-    document.addEventListener("touchend", () => {
-      isMouseDown = false;
-    });
   </script>
 </body>
 </html>
