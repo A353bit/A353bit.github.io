@@ -44,8 +44,6 @@
       background-color: green;
       border-radius: 50%;
       position: absolute;
-      left: 50%;
-      top: 50%;
       transform: translate(-50%, -50%);
     }
     #penalty-bar-container {
@@ -69,14 +67,12 @@
   </style>
 </head>
 <body>
-  <!-- Schermata di inizio -->
   <div id="start-screen">
     <h1>Pressure Minigame</h1>
     <p>Mantieni il cursore nel rettangolo!</p>
     <button id="start-btn">Inizia</button>
   </div>
 
-  <!-- Area di gioco -->
   <div id="game-area">
     <div class="rect" id="rect">
       <div id="cursor"></div>
@@ -94,24 +90,21 @@
 
     const rect = document.getElementById("rect");
     const cursor = document.getElementById("cursor");
-    const message = document.getElementById("message");
     const penaltyBar = document.getElementById("penalty-bar");
 
-    let isMouseDown = false;
-    let cursorX = 0, cursorY = 0;
+    let isDragging = false;
     let penaltyTime = 0, mainTimer = 60;
-    const penaltyMax = 5; // Penalità massima
-    const penaltyIncrement = 1; // Penalità per secondo fuori
-    const penaltyRecovery = 0.1; // Recupero per secondo dentro
-    const isMobile = /Mobi|Android/i.test(navigator.userAgent); // Rileva mobile
+    const penaltyMax = 5; 
+    const penaltyIncrement = 1; 
+    const penaltyRecovery = 0.1; 
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
-    // Inizializzazione del gioco
     startBtn.addEventListener("click", () => {
       startScreen.style.display = "none";
       gameArea.style.display = "flex";
 
       if (!isMobile) {
-        document.body.requestPointerLock(); // Blocca il cursore solo su desktop
+        document.body.requestPointerLock(); 
       }
       startGame();
     });
@@ -120,28 +113,24 @@
       cursor.style.left = "50%";
       cursor.style.top = "50%";
 
-      // Movimento del cursore
       if (isMobile) {
+        document.addEventListener("touchstart", handleTouchStart);
         document.addEventListener("touchmove", handleTouchMove);
-        document.addEventListener("touchstart", () => (isMouseDown = true));
-        document.addEventListener("touchend", () => (isMouseDown = false));
+        document.addEventListener("touchend", () => (isDragging = false));
       } else {
+        document.addEventListener("mousedown", () => (isDragging = true));
+        document.addEventListener("mouseup", () => (isDragging = false));
         document.addEventListener("mousemove", handleMouseMove);
-        document.addEventListener("mousedown", () => (isMouseDown = true));
-        document.addEventListener("mouseup", () => (isMouseDown = false));
       }
 
-      // Timer di gioco
       const gameInterval = setInterval(() => {
         mainTimer--;
 
-        // Controlla il tempo rimasto
         if (mainTimer <= 0) {
           clearInterval(gameInterval);
           endGame(true);
         }
 
-        // Aggiorna la penalità
         const isInRect = checkCursorInRect();
         if (!isInRect) {
           penaltyTime += penaltyIncrement;
@@ -149,43 +138,52 @@
           penaltyTime = Math.max(0, penaltyTime - penaltyRecovery);
         }
 
-        // Aggiorna la barra della penalità
         const penaltyPercentage = Math.min(100, (penaltyTime / penaltyMax) * 100);
         penaltyBar.style.width = `${penaltyPercentage}%`;
 
-        // Controlla se la penalità massima è raggiunta
         if (penaltyTime >= penaltyMax) {
           clearInterval(gameInterval);
           endGame(false);
         }
-
-        message.textContent = `Tempo rimanente: ${mainTimer}s`;
       }, 1000);
     }
 
     function handleMouseMove(event) {
-      if (!isMouseDown) return; // Sposta il cursore solo se il mouse è premuto
+      if (!isDragging) return;
 
       const movementX = event.movementX || 0;
       const movementY = event.movementY || 0;
 
-      cursorX += movementX;
-      cursorY += movementY;
+      const rectBounds = rect.getBoundingClientRect();
+      const cursorX = cursor.offsetLeft + movementX;
+      const cursorY = cursor.offsetTop + movementY;
 
-      cursor.style.left = `${cursorX}px`;
-      cursor.style.top = `${cursorY}px`;
+      if (cursorX > 0 && cursorX < rectBounds.width) {
+        cursor.style.left = `${cursorX}px`;
+      }
+      if (cursorY > 0 && cursorY < rectBounds.height) {
+        cursor.style.top = `${cursorY}px`;
+      }
+    }
+
+    function handleTouchStart(event) {
+      isDragging = true;
     }
 
     function handleTouchMove(event) {
-      if (!isMouseDown || event.touches.length === 0) return;
+      if (!isDragging || event.touches.length === 0) return;
 
       const touch = event.touches[0];
       const rectBounds = rect.getBoundingClientRect();
-      cursorX = touch.clientX - rectBounds.left;
-      cursorY = touch.clientY - rectBounds.top;
+      const touchX = touch.clientX - rectBounds.left;
+      const touchY = touch.clientY - rectBounds.top;
 
-      cursor.style.left = `${cursorX}px`;
-      cursor.style.top = `${cursorY}px`;
+      if (touchX > 0 && touchX < rectBounds.width) {
+        cursor.style.left = `${touchX}px`;
+      }
+      if (touchY > 0 && touchY < rectBounds.height) {
+        cursor.style.top = `${touchY}px`;
+      }
     }
 
     function checkCursorInRect() {
@@ -202,12 +200,9 @@
 
     function endGame(isVictory) {
       if (!isMobile) {
-        document.exitPointerLock(); // Rilascia il blocco del puntatore
+        document.exitPointerLock(); 
       }
-      message.textContent = isVictory ? "Hai vinto!" : "Game Over!";
-      message.style.color = isVictory ? "green" : "red";
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("touchmove", handleTouchMove);
+      alert(isVictory ? "Hai vinto!" : "Game Over!");
     }
   </script>
 </body>
