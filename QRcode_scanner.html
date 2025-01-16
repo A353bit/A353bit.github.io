@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scannerizza QR Code da Immagine</title>
+  <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 20px;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    input[type="file"] {
+      width: 90%;
+      max-width: 400px;
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px 0;
+    }
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+      width: 90%;
+      max-width: 400px;
+    }
+    #scanner-result {
+      margin-top: 20px;
+      display: none;
+    }
+    #result-text {
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Scannerizza QR Code da File Immagine</h1>
+  
+  <!-- Selettore File -->
+  <input type="file" id="file-input" accept="image/*" onchange="scanQRCodeFromFile(event)" />
+  
+  <!-- Risultato della scansione -->
+  <div id="scanner-result">
+    <h3>Risultato della Scannerizzazione:</h3>
+    <p id="result-text"></p>
+  </div>
+
+  <script>
+    // Funzione per scannerizzare il QR Code da file
+    function scanQRCodeFromFile(event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        const image = new Image();
+        image.onload = function () {
+          const html5QrCode = new Html5Qrcode();
+          html5QrCode.scanFile(e.target.result, true)
+            .then(decodedText => {
+              document.getElementById('result-text').textContent = `Risultato: ${decodedText}`;
+              document.getElementById('scanner-result').style.display = 'block';
+            })
+            .catch(err => {
+              console.error("Errore durante la scansione:", err);
+              alert("Nessun QR Code trovato nell'immagine.");
+            });
+        };
+        image.src = e.target.result;
+      };
+
+      reader.readAsDataURL(file);
+    }
+  </script>
+</body>
+</html>
