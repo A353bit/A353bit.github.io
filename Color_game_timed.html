@@ -166,7 +166,7 @@
     </div>
 
     <!-- Timer di gioco -->
-    <div class="timer" id="timer">Tempo: 180</div>
+    <div class="timer" id="timer">Tempo: 150</div>
 
     <!-- Pulsante di reset -->
     <button class="reset-button" id="resetButton" style="display:none;">Ricomincia Gioco</button>
@@ -190,7 +190,7 @@
         const audio = document.getElementById('backgroundAudio');
         let gameInterval;
         let timerInterval;
-        let timeLeft = 180;
+        let timeLeft = 150;
 
         function randomColor() {
             return colors[Math.floor(Math.random() * colors.length)];
@@ -239,7 +239,7 @@
                 document.getElementById('timer').style.display = 'block';
 
                 score = 0;
-                timeLeft = 180;
+                timeLeft = 150;
                 document.getElementById('score').textContent = score;
                 document.getElementById('highscore').textContent = highscore2;
                 document.getElementById('timer').textContent = `Tempo: ${timeLeft}`;
