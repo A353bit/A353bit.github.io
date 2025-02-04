@@ -254,14 +254,6 @@
             timeLeft--;
             document.getElementById('timer').textContent = `Tempo: ${timeLeft}`;
 
-            if (timeLeft <= 115.5) {
-                document.body.style.background = "linear-gradient(45deg, Gold, Goldenrod)";
-            }
-            
-            if (timeLeft <= 64) {
-                document.body.style.background = "linear-gradient(45deg, Orange, OrangeRed)";;
-            }
-            
             if (timeLeft <= 0) {
                 endGame();
             }
@@ -274,7 +266,7 @@
             document.querySelector('.squares').style.display = 'none';
             document.getElementById('timer').style.display = 'none';
             document.getElementById('h3').style.display = 'block';
-            document.body.style.backgroundColor = Red;
+            document.getElementById('h2').style.display = 'block';
         }
 
         function resetGame() {
