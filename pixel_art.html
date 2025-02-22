@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixel Art Editor</title>
+  <style>
+    /* Stili base */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f0f0;
+    }
+    h1 {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .controls {
+      text-align: center;
+      padding: 10px;
+    }
+    .controls input,
+    .controls button {
+      margin: 5px;
+      padding: 5px;
+      font-size: 16px;
+    }
+    #canvas {
+      display: grid;
+      width: 320px;
+      height: 320px;
+      margin: 20px auto;
+      border: 2px solid #000;
+    }
+    .pixel {
+      border: 1px solid #ddd;
+      background-color: white;
+    }
+    #fileNameInput {
+      text-align: center;
+      margin: 10px;
+      display: none;
+    }
+    /* Overlay per l'elenco dei disegni salvati */
+    #overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+    }
+    #overlay .modal {
+      background: white;
+      width: 300px;
+      margin: 100px auto;
+      padding: 20px;
+      border-radius: 5px;
+    }
+    #overlay .modal h3 {
+      margin-top: 0;
+    }
+    .saved-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 5px 0;
+    }
+    .saved-item button {
+      margin-left: 5px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Pixel Art Editor</h1>
+  <div class="controls">
+    <!-- Selezione colore -->
+    <input type="color" id="colorPicker" value="#000000">
+    <input type="text" id="hexColor" value="#000000" size="7">
+    <!-- Pulsanti per la modalità gomma e cancellazione -->
+    <button id="eraser">Gomma</button>
+    <button id="clear">Cancella tutto</button>
+    <!-- Dimensione della griglia -->
+    <label>Griglia: <input type="number" id="gridSize" min="5" max="50" value="16"></label>
+    <button id="generateGrid">Genera</button>
+    <!-- Pulsanti di salvataggio e caricamento -->
+    <button id="saveOptions">Salva</button>
+    <button id="loadOptions">Carica</button>
+  </div>
+  
+  <!-- Area di disegno -->
+  <div id="canvas"></div>
+  
+  <<!-- Area per l'inserimento del nome e scelta modalità salvataggio -->
+<div id="fileNameInput">
+  <label>Nome file: <input type="text" id="fileName" placeholder="pixel_art"></label>
+  <button id="saveJPG">Salva come JPG</button>
+  <button id="saveLocal">Salva su LocalStorage</button>
+  <button id="cancelSave">Annulla</button> <!-- Nuovo pulsante -->
+</div>
+  
+  <!-- Overlay modale per la lista dei disegni salvati -->
+  <div id="overlay">
+    <div class="modal">
+      <h3>Disegni salvati</h3>
+      <ul id="savedDrawings"></ul>
+      <button id="closeOverlay">Chiudi</button>
+    </div>
+  </div>
+  
+  <!-- Inclusione di html2canvas (versione 1.4.1) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script>
+let touchStartY = 0;
+
+// Intercetta l'inizio del tocco
+window.addEventListener("touchstart", (event) => {
+  touchStartY = event.touches[0].clientY;
+}, { passive: true });
+
+// Blocca lo scroll verso il basso dalla cima della pagina
+window.addEventListener("touchmove", (event) => {
+  if (window.scrollY === 0 && event.touches[0].clientY > touchStartY) {
+    event.preventDefault();
+  }
+}, { passive: false });
+
+    // Riferimenti agli elementi del DOM
+    const canvas = document.getElementById("canvas");
+    const colorPicker = document.getElementById("colorPicker");
+    const hexColor = document.getElementById("hexColor");
+    const eraser = document.getElementById("eraser");
+    const clear = document.getElementById("clear");
+    const gridSizeInput = document.getElementById("gridSize");
+    const generateGrid = document.getElementById("generateGrid");
+    const saveOptions = document.getElementById("saveOptions");
+    const loadOptions = document.getElementById("loadOptions");
+    const fileNameInput = document.getElementById("fileNameInput");
+    const fileNameField = document.getElementById("fileName");
+    const saveJPG = document.getElementById("saveJPG");
+    const saveLocal = document.getElementById("saveLocal");
+    const overlay = document.getElementById("overlay");
+    const savedDrawings = document.getElementById("savedDrawings");
+    const closeOverlay = document.getElementById("closeOverlay");
+    
+    let currentColor = "#000000";
+    let isErasing = false;
+    
+    /* Gestione della selezione colore */
+    colorPicker.addEventListener("input", () => {
+      currentColor = colorPicker.value;
+      hexColor.value = colorPicker.value;
+    });
+    hexColor.addEventListener("input", () => {
+      const hex = hexColor.value;
+      if (/^#([0-9A-F]{3}){1,2}$/i.test(hex)) {
+        currentColor = hex;
+        colorPicker.value = hex;
+      }
+    });
+
+    // Pulsante "Annulla" per chiudere la finestra di salvataggio
+    document.getElementById("cancelSave").addEventListener("click", () => {
+     fileNameInput.style.display = "none";
+     fileNameField.value = ""; // Pulisce il campo del nome file
+    });
+
+    /* Modalità gomma: attiva/disattiva */
+    eraser.addEventListener("click", () => {
+      isErasing = !isErasing;
+      eraser.textContent = isErasing ? "Disegna" : "Gomma";
+    });
+    
+    /* Pulsante per cancellare tutta la griglia */
+    clear.addEventListener("click", () => {
+      document.querySelectorAll(".pixel").forEach(pixel => {
+        pixel.style.backgroundColor = "white";
+      });
+    });
+    
+    /* Funzione per creare la griglia */
+    function createGrid(size) {
+      canvas.innerHTML = "";
+      canvas.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+      canvas.style.gridTemplateRows = `repeat(${size}, 1fr)`;
+      for (let i = 0; i < size * size; i++) {
+        const pixel = document.createElement("div");
+        pixel.classList.add("pixel");
+        pixel.style.backgroundColor = "white";
+        pixel.addEventListener("mousedown", () => {
+          pixel.style.backgroundColor = isErasing ? "white" : currentColor;
+        });
+        pixel.addEventListener("mouseover", (e) => {
+          if (e.buttons === 1) {
+            pixel.style.backgroundColor = isErasing ? "white" : currentColor;
+          }
+        });
+        canvas.appendChild(pixel);
+      }
+    }
+    
+    generateGrid.addEventListener("click", () => {
+      const size = parseInt(gridSizeInput.value);
+      if (size < 5 || size > 50) {
+        alert("La dimensione deve essere tra 5 e 50.");
+      } else {
+        createGrid(size);
+      }
+    });
+    
+    // Creazione della griglia iniziale (16x16)
+    createGrid(16);
+    
+    /* Salvataggio: mostra la sezione per il nome file */
+    saveOptions.addEventListener("click", () => {
+      fileNameInput.style.display = "block";
+    });
+    
+    /* Salva come JPG (senza griglia) */
+    saveJPG.addEventListener("click", () => {
+  let name = fileNameField.value.trim();
+  if (!name) {
+    name = "pixel_art_" + new Date().getTime();
+  }
+
+  try {
+    // Creazione di un canvas temporaneo per il salvataggio senza griglia
+    const size = parseInt(gridSizeInput.value);
+    const tempCanvas = document.createElement("canvas");
+    const ctx = tempCanvas.getContext("2d");
+    tempCanvas.width = canvas.clientWidth;
+    tempCanvas.height = canvas.clientHeight;
+
+    const pixels = document.querySelectorAll(".pixel");
+    const pixelSize = tempCanvas.width / size;
+
+    pixels.forEach((pixel, index) => {
+      const row = Math.floor(index / size);
+      const col = index % size;
+      ctx.fillStyle = pixel.style.backgroundColor || "white";
+      ctx.fillRect(col * pixelSize, row * pixelSize, pixelSize, pixelSize);
+    });
+
+    // Converti in JPG e scarica
+    tempCanvas.toBlob(blob => {
+      if (blob) {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = name + ".jpg";
+        link.click();
+        URL.revokeObjectURL(link.href); // Rilascia memoria
+      } else {
+        throw new Error("Errore nella conversione del canvas in JPG.");
+      }
+    }, "image/jpeg", 1.0);
+  } catch (err) {
+    alert("Errore nel salvataggio JPG: " + err.message);
+  }
+
+  fileNameInput.style.display = "none";
+  fileNameField.value = "";
+
+  // Evita il comportamento di refresh durante lo scroll su dispositivi touch
+  window.addEventListener('touchmove', function(event) {
+    event.preventDefault();
+  }, { passive: false });
+});
+    
+    /* Salva su localStorage */
+    saveLocal.addEventListener("click", () => {
+      let name = fileNameField.value.trim();
+      if (!name) {
+        name = "pixel_art_" + new Date().getTime();
+      } else if (!name.startsWith("pixel_art_")) {
+        name = "pixel_art_" + name;
+      }
+      const pixels = Array.from(canvas.children).map(pixel => pixel.style.backgroundColor);
+      const gridData = { size: parseInt(gridSizeInput.value), colors: pixels };
+      localStorage.setItem(name, JSON.stringify(gridData));
+      alert("Disegno salvato in localStorage con nome: " + name);
+      fileNameInput.style.display = "none";
+      fileNameField.value = "";
+      updateSavedList();
+    });
+    
+    /* Mostra overlay con la lista dei disegni salvati */
+    loadOptions.addEventListener("click", () => {
+      updateSavedList();
+      overlay.style.display = "block";
+    });
+    
+    /* Chiude l'overlay */
+    closeOverlay.addEventListener("click", () => {
+      overlay.style.display = "none";
+    });
+    
+    /* Aggiorna la lista dei disegni salvati */
+    function updateSavedList() {
+      savedDrawings.innerHTML = "";
+      // Filtra le chiavi che iniziano con "pixel_art_"
+      const keys = Object.keys(localStorage).filter(key => key.startsWith("pixel_art_"));
+      if (keys.length === 0) {
+        const li = document.createElement("li");
+        li.textContent = "Nessun disegno salvato";
+        savedDrawings.appendChild(li);
+      } else {
+        keys.forEach(key => {
+          const li = document.createElement("li");
+          li.classList.add("saved-item");
+          const span = document.createElement("span");
+          span.textContent = key;
+          const loadBtn = document.createElement("button");
+          loadBtn.textContent = "Carica";
+          loadBtn.addEventListener("click", () => {
+            loadGrid(key);
+            overlay.style.display = "none";
+          });
+          const deleteBtn = document.createElement("button");
+          deleteBtn.textContent = "Elimina";
+          deleteBtn.addEventListener("click", () => {
+            if (confirm("Eliminare il disegno " + key + "?")) {
+              localStorage.removeItem(key);
+              updateSavedList();
+            }
+          });
+          li.appendChild(span);
+          li.appendChild(loadBtn);
+          li.appendChild(deleteBtn);
+          savedDrawings.appendChild(li);
+        });
+      }
+    }
+    
+    /* Carica la griglia salvata da localStorage */
+    function loadGrid(name) {
+      const savedData = localStorage.getItem(name);
+      if (savedData) {
+        const gridData = JSON.parse(savedData);
+        createGrid(gridData.size);
+        gridData.colors.forEach((color, index) => {
+          if (canvas.children[index]) {
+            canvas.children[index].style.backgroundColor = color;
+          }
+        });
+      } else {
+        alert("Disegno non trovato.");
+      }
+    }
+  </script>
+</body>
+</html>
